@@ -353,3 +353,336 @@ glpm_find_x1 = function(L, V, H) {
   }
   return(x1)
 }
+# ZEIM variables in package environment ----------------------------------------
+# https://stackoverflow.com/questions/12598242/global-variables-in-packages-in-r
+pkg_env = new.env()
+pkg_env$m = 31
+pkg_env$X0 = gsl::bessel_zero_J0(1:pkg_env$m)
+pkg_env$J1 = besselJ(pkg_env$X0,1)
+
+# ZEIM axial potential --------------------------------------------------------------
+#' Calculates the axial potential of cylindrical Zhang–Enke ion mirrors.
+#'
+#' \code{zeim_potential} calculates the axial potential of cylindrical 
+#' three-element Zhang–Enke ion mirrors.
+#'
+#' @param x Axial distance from the entrance grid.
+#' @param z1 Distance where electrode 1 starts.
+#' @param z2 Distance where electrode 2 starts.
+#' @param L Total length of the mirror, i.e. disance where end cap is.
+#' @param V1 Voltage of electrode 1.
+#' @param V2 Voltage of electrode 2.
+#' @param R Radius of the cylinder.
+#'
+#' @return Axial potential at \code{x}.
+#'
+#' @references Yefchak, G.E. and Flory, C.A. (2002), Improved method for 
+#' designing a cylindrical Zhang–Enke ion mirror, \emph{International Journal 
+#' of Mass Spectrometry}, \strong{214}, 89-94, doi:10.1016/S1387-3806(01)00564-4.
+#' 
+#' @keywords internal
+#' @export
+zeim_potential = function(x, z1, z2, L, V1, V2, R) {
+  
+  # Note: x needs to be of length 1.
+  I0 = besselI((1:pkg_env$m)*pi*R/L, 0)
+  tmp = sinh(pkg_env$X0/R*x)/(pkg_env$X0*pkg_env$J1*sinh(pkg_env$X0/R*L))
+  # Note: sum(tmp) does not converge well for x=L -> add half of last summand
+  # i.e. (sum(tmp[1:m] + sum(tmp[2:m+1]))/2
+  Vx = 2*V2*(sum(tmp[1:(pkg_env$m-1)], na.rm = TRUE) + tmp[pkg_env$m]/2) +
+    2*V1/pi*sum((cos((1:pkg_env$m)*pi*z1/L)-cos((1:pkg_env$m)*pi*z2/L))/
+                  ((1:pkg_env$m)*I0)*sin((1:pkg_env$m)*pi*x/L), na.rm = TRUE) +
+    2*V2/pi*sum((cos((1:pkg_env$m)*pi*z2/L)-(-1)^(1:pkg_env$m))/
+                  ((1:pkg_env$m)*I0)*sin((1:pkg_env$m)*pi*x/L), na.rm = TRUE)
+  return(Vx)
+}
+
+# ZEIM inverse of axial potential ---------------------------------------------------
+#' Calculates the inverse of the axial potential function.
+#'
+#' \code{zeim_potential_inv} calculates the position x given the axial potential (inverse
+#' of axial potential function).
+#'
+#' The inverse of the axial potential function is used to calculate the turning 
+#' point inside the mirror for a given kinetic energy.
+#' 
+#' @param x Axial distance from the entrance grid.
+#' @param z1 Distance where electrode 1 starts.
+#' @param z2 Distance where electrode 2 starts.
+#' @param L Total length of the mirror, i.e. disance where end cap is.
+#' @param V1 Voltage of electrode 1.
+#' @param V2 Voltage of electrode 2.
+#' @param R Radius of the cylinder.
+#'
+#' @return Position x where the axial potential = y.
+#' 
+#' @keywords internal
+#' @export
+zeim_potential_inv = function(y, z1, z2, L, V1, V2, R) {
+  stats::uniroot((function(x,z1,z2,L,V1,V2,R) zeim_potential(x,z1,z2,L,V1,V2,R)-y), 
+                 interval = c(0,L), z1, z2, L, V1, V2, R, tol = 1e-15)$root
+}
+
+# ZEIM integrand for tof period calculation -----------------------------------------
+#' Integrand for tof period calculation.
+#'
+#' \code{zeim_integrand} is the integrand for the time-of-flight period calculation.
+#' 
+#' @param x Axial distance from the entrance grid.
+#' @param E Potential energy at the turning point.
+#' @param z1 Distance where electrode 1 starts.
+#' @param z2 Distance where electrode 2 starts.
+#' @param L Total length of the mirror, i.e. disance where end cap is.
+#' @param V1 Voltage of electrode 1.
+#' @param V2 Voltage of electrode 2.
+#' @param R Radius of the cylinder.
+#'
+#' @return Axial potential at \code{x}.
+#' 
+#' @keywords internal
+#' @export
+zeim_integrand = function(x, E, z1, z2, L, V1, V2, R) {
+  
+  I0 = besselI((1:pkg_env$m)*pi*R/L, 0)
+  a1 = 0
+  a2 = 0
+  a3 = 0
+  for (i in 1:(pkg_env$m-1)) {
+    a1 = a1 + sinh(pkg_env$X0[i]/R*x)/(pkg_env$X0[i]*pkg_env$J1[i]*sinh(pkg_env$X0[i]/R*L))
+  }
+  a1 = a1 + sinh(pkg_env$X0[pkg_env$m]/R*x)/
+    (pkg_env$X0[pkg_env$m]*pkg_env$J1[pkg_env$m]*sinh(pkg_env$X0[pkg_env$m]/R*L))/2
+  for (i in 1:pkg_env$m) {
+    a2 = a2 + (cos(i*pi*z1/L)-cos(i*pi*z2/L))/(i*I0[i])*sin(i*pi*x/L)
+  }
+  for (i in 1:pkg_env$m) {
+    a3 = a3 + (cos(i*pi*z2/L)-(-1)^i)/(i*I0[i])*sin(i*pi*x/L)
+  }
+  Vx = 2*V2*a1 + 2*V1/pi*a2 + 2*V2/pi*a3
+  
+  Vx = 1/sqrt(E - Vx)
+  
+  return(Vx)
+}
+
+# ZEIM tof period -------------------------------------------------------------------
+#' Time-of-flight period calculation.
+#'
+#' \code{zeim_tofperiod} calculates the time-of-flight period inside the mirror.
+#' 
+#' This integrates the particle motion from the entrance grid to the turning 
+#' point x0. Because here we are only interested in relative time-of-flight 
+#' deviations all constant factors (e.g. \code{2*sqrt(2*m*amu/e)}) are omitted 
+#' and the time-of-flight is in arbitrary units.
+#' 
+#' @param E Potential energy at the turning point.
+#' @param z1 Distance where electrode 1 starts.
+#' @param z2 Distance where electrode 2 starts.
+#' @param L Total length of the mirror, i.e. disance where end cap is.
+#' @param V1 Voltage of electrode 1.
+#' @param V2 Voltage of electrode 2.
+#' @param R Radius of the cylinder.
+#'
+#' @return time-of-flight.
+#' 
+#' @keywords internal
+#' @export
+zeim_tofperiod = function(E, z1, z2, L, V1, V2, R) {
+  x0 = sapply(E, zeim_potential_inv, z1, z2, L, V1, V2, R)
+  tof = mapply(function(x0, E) stats::integrate(zeim_integrand, 0, x0, E, z1, 
+                                                z2, L, V1, V2, R, rel.tol = 1e-6)$value, x0, E)
+  return(tof)
+}
+
+# ZEIM tof focus point --------------------------------------------------------------
+#' Finds the time-of-flight focal point of the mirror.
+#'
+#' \code{zeim_find_x1} finds the time-of-flight focal point of the mirror.
+#' 
+#' @param z1 Distance where electrode 1 starts.
+#' @param z2 Distance where electrode 2 starts.
+#' @param L Total length of the mirror, i.e. disance where end cap is.
+#' @param V1 Voltage of electrode 1.
+#' @param V2 Voltage of electrode 2.
+#' @param R Radius of the cylinder.
+#'
+#' @return time-of-flight.
+#' 
+#' @keywords internal
+#' @export
+zeim_find_x1 = function(z1, z2, L, V1, V2, R) {
+  E = seq(0.99, 1.01, length.out = 2)
+  x1 = L
+  dx = 10
+  repeat {
+    tmp = zeim_tofperiod(E = E, z1, z2, L, V1, V2, R) + x1*1/sqrt(E)
+    if (diff(tmp) < 0) {
+      x1 = x1 - dx
+      dx = dx/10
+    }
+    x1 = x1 + dx
+    if (dx < 1e-5) break
+  }
+  return(x1)
+}
+# PIM basic potential function -------------------------------------------------
+U0 = function(V, z) {
+  2*V/pi*atan(exp(pi*z))
+}
+
+# PIM axial potential --------------------------------------------------------------
+#' Calculates the axial potential of a planar three-element ion mirror.
+#'
+#' \code{pim_potential} calculates the axial potential of a planar 
+#' three-element ion mirror.
+#'
+#' @param x Axial distance from the entrance grid (normalized with H).
+#' @param z1 Distance where electrode 1 starts (normalized with H).
+#' @param z2 Distance where electrode 2 starts (normalized with H).
+#' @param L Total length of the mirror, i.e. disance where end cap is (normalized with H).
+#' @param V1 Voltage of electrode 1.
+#' @param V2 Voltage of electrode 2.
+#' 
+#' All distances are normalized with the height of the mirror electrodes H 
+#' (which is the same for all electrodes).
+#'
+#' @return Axial potential at \code{x}.
+#'
+#' @references Yavor, M.I. et al. (2018), High performance gridless ion mirrors 
+#' for multi-reflection time-of-flight and electrostatic trap mass analyzers, 
+#' \emph{International Journal of Mass Spectrometry}, \strong{426},
+#' 1-11, doi:10.1016/j.ijms.2018.01.009.
+#' 
+#' @keywords internal
+#' @export
+pim_potential = function(x, z1, z2, L, V1, V2) {
+  
+  Vx = U0(V1, x-z1) - U0(V1, x-z2) + U0(V1, x+z1) - U0(V1, x+z2) +
+    U0(V2, -x+L) - U0(V2,-x+2*L-z2) + U0(V2,-x+L) - U0(V2,-x+z2) + 2*U0(V2,x-L)
+    
+  return(Vx)
+}
+
+# PIM inverse of axial potential ---------------------------------------------------
+#' Calculates the inverse of the axial potential function.
+#'
+#' \code{pim_potential_inv} calculates the position x given the axial potential (inverse
+#' of axial potential function).
+#'
+#' The inverse of the axial potential function is used to calculate the turning 
+#' point inside the mirror for a given kinetic energy.
+#' 
+#' @param x Axial distance from the entrance grid (normalized with H).
+#' @param z1 Distance where electrode 1 starts (normalized with H).
+#' @param z2 Distance where electrode 2 starts (normalized with H).
+#' @param L Total length of the mirror, i.e. disance where end cap is (normalized with H).
+#' @param V1 Voltage of electrode 1.
+#' @param V2 Voltage of electrode 2.
+#' 
+#' All distances are normalized with the height of the mirror electrodes H 
+#' (which is the same for all electrodes).
+#'
+#' @return Position x where the axial potential = y.
+#' 
+#' @keywords internal
+#' @export
+pim_potential_inv = function(y, z1, z2, L, V1, V2) {
+  stats::uniroot((function(x,z1,z2,L,V1,V2) pim_potential(x,z1,z2,L,V1,V2)-y), 
+                 interval = c(0,L), z1, z2, L, V1, V2, tol = 1e-15)$root
+}
+
+# PIM integrand for tof period calculation -----------------------------------------
+#' Integrand for tof period calculation.
+#'
+#' \code{pim_integrand} is the integrand for the time-of-flight period calculation.
+#' 
+#' @param x Axial distance from the entrance grid (normalized with H).
+#' @param E Potential energy at the turning point (normalized with H).
+#' @param z1 Distance where electrode 1 starts (normalized with H).
+#' @param z2 Distance where electrode 2 starts (normalized with H).
+#' @param L Total length of the mirror, i.e. disance where end cap is (normalized with H).
+#' @param V1 Voltage of electrode 1.
+#' @param V2 Voltage of electrode 2.
+#' 
+#' All distances are normalized with the height of the mirror electrodes H 
+#' (which is the same for all electrodes).
+#'
+#' @return Axial potential at \code{x}.
+#' 
+#' @keywords internal
+#' @export
+pim_integrand = function(x, E, z1, z2, L, V1, V2) {
+
+  Vx = U0(V1, x-z1) - U0(V1, x-z2) + U0(V1, x+z1) - U0(V1, x+z2) +
+    U0(V2, -x+L) - U0(V2,-x+2*L-z2) + U0(V2,-x+L) - U0(V2,-x+z2) + 2*U0(V2,x-L)
+  
+  Vx = 1/sqrt(E - Vx)
+  
+  return(Vx)
+}
+
+# PIM tof period -------------------------------------------------------------------
+#' Time-of-flight period calculation.
+#'
+#' \code{pim_tofperiod} calculates the time-of-flight period inside the mirror.
+#' 
+#' This integrates the particle motion from the entrance grid to the turning 
+#' point x0. Because here we are only interested in relative time-of-flight 
+#' deviations all constant factors (e.g. \code{2*sqrt(2*m*amu/e)}) are omitted 
+#' and the time-of-flight is in arbitrary units.
+#' 
+#' @param E Potential energy at the turning point.
+#' @param z1 Distance where electrode 1 starts (normalized with H).
+#' @param z2 Distance where electrode 2 starts (normalized with H).
+#' @param L Total length of the mirror, i.e. disance where end cap is (normalized with H).
+#' @param V1 Voltage of electrode 1.
+#' @param V2 Voltage of electrode 2.
+#' 
+#' All distances are normalized with the height of the mirror electrodes H 
+#' (which is the same for all electrodes).
+#'
+#' @return time-of-flight.
+#' 
+#' @keywords internal
+#' @export
+pim_tofperiod = function(E, z1, z2, L, V1, V2) {
+  x0 = sapply(E, pim_potential_inv, z1, z2, L, V1, V2)
+  tof = mapply(function(x0, E) stats::integrate(pim_integrand, 0, x0, E, z1, 
+                                                z2, L, V1, V2, rel.tol = 1e-6)$value, x0, E)
+  return(tof)
+}
+
+# PIM tof focus point --------------------------------------------------------------
+#' Finds the time-of-flight focal point of the mirror.
+#'
+#' \code{pim_find_x1} finds the time-of-flight focal point of the mirror.
+#' 
+#' @param z1 Distance where electrode 1 starts (normalized with H).
+#' @param z2 Distance where electrode 2 starts (normalized with H).
+#' @param L Total length of the mirror, i.e. disance where end cap is (normalized with H).
+#' @param V1 Voltage of electrode 1.
+#' @param V2 Voltage of electrode 2.
+#' 
+#' All distances are normalized with the height of the mirror electrodes H 
+#' (which is the same for all electrodes).
+#'
+#' @return time-of-flight.
+#' 
+#' @keywords internal
+#' @export
+pim_find_x1 = function(z1, z2, L, V1, V2) {
+  E = seq(0.99, 1.01, length.out = 2)
+  x1 = 0
+  dx = 10
+  repeat {
+    tmp = pim_tofperiod(E = E, z1, z2, L, V1, V2) + x1*1/sqrt(E)
+    if (diff(tmp) < 0) {
+      x1 = x1 - dx
+      dx = dx/10
+    }
+    x1 = x1 + dx
+    if (dx < 1e-5) break
+  }
+  if (x1<0) stop("x1 < 0")
+  return(x1)
+}
