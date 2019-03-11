@@ -12,6 +12,6 @@ Description: The R package provides functions to optimize the geometry and
 License: GPL-3
 URL: https://github.com/pasturm/imo
 BugReports: https://github.com/pasturm/imo/issues
-Imports: rsm, RcppTOML, plotly, gplots, foreach, doParallel, gsl
+Imports: RcppTOML, plotly, gplots, foreach, doParallel, gsl
 Encoding: UTF-8
 RoxygenNote: 6.0.1
