@@ -169,7 +169,7 @@ run_imo = function(imo_config, resume = FALSE,
     
     # run experiments
     E = seq(1-range_E/200, 1+range_E/200, 0.005)  # energies (keV)
-    
+
     type = match.arg(type)
     if (type == "GLPM") {
       H = 20
@@ -185,21 +185,24 @@ run_imo = function(imo_config, resume = FALSE,
         x1 = zeim_find_x1(runs$Z1[i], runs$Z2[i], runs$L[i], runs$V1[i], runs$V2[i], runs$R[i])
         tmp = zeim_tofperiod(E = E, runs$Z1[i], runs$Z2[i], runs$L[i], runs$V1[i], 
                              runs$V2[i], runs$R[i]) + x1*1/sqrt(E)
-        return(c(i, 1/stats::sd(tmp), tmp))
+        return(c(i, 1/stats::sd(tmp), x1, tmp))
         }
     } else if (type == "PIM") {
       result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
-        x1 = pim_find_x1(runs$Z1[i], runs$Z2[i], runs$L[i], runs$V1[i], runs$V2[i])
-        tmp = pim_tofperiod(E = E, runs$Z1[i], runs$Z2[i], runs$L[i], runs$V1[i], runs$V2[i]) + x1*1/sqrt(E)
-        return(c(i, 1/stats::sd(tmp), tmp))
+        z = c(runs$Z1[i], runs$Z2[i], runs$Z3[i], runs$Z4[i], runs$L[i])
+        V = c(0, runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i])
+        x1 = pim_find_x1(z, V)
+        # x1 = 5
+        tmp = pim_tofperiod(E = E, z, V) + x1*1/sqrt(E)
+        return(c(i, 1/stats::sd(tmp), x1, tmp))
       }
     }
     
     result = as.data.frame(result, row.names = NA)
-    names(result) = c("no", "res")
+    names(result) = c("no", "res", "x1")
     
     # plot
-    tmp = result[,!(names(result) %in% c("no", "res"))]
+    tmp = result[,!(names(result) %in% c("no", "res", "x1"))]
     graphics::plot((E-1)*100, (tmp[1,]-tmp[1,ceiling(length(E)/2)])/tmp[1,ceiling(length(E)/2)]*1e6,
                    type = "l", col = grDevices::rgb(0,0,0,0.3), main = paste("Repeat", k),
                    ylab = expression(paste(Delta,"tof/tof") ~ "/" ~ 10^{6}),
@@ -210,7 +213,7 @@ run_imo = function(imo_config, resume = FALSE,
                       col = grDevices::rgb(0,0,0,0.3))
     }
     
-    result = result[c("no", "res")]
+    result = result[c("no", "res", "x1")]
     
     utils::write.table(signif(result, 12), file = file.path(imo_dir, resultdir, "results.txt"), 
                        sep = "|", row.names = FALSE, col.names = TRUE, eol = "|\n")
@@ -278,7 +281,7 @@ run_imo = function(imo_config, resume = FALSE,
                        sep = "|", row.names = FALSE, col.names = TRUE, eol = "|\n")
     
     # run experiment
-    bestpoint_result = data.frame(no = 1, res = NA)
+    bestpoint_result = data.frame(no = 1, res = NA, x1 = NA)
     
     # adjust to match choosen parameters
     if (type == "GLPM") {
@@ -294,12 +297,14 @@ run_imo = function(imo_config, resume = FALSE,
                            bestpoint_run$L, bestpoint_run$V1, bestpoint_run$V2,
                            bestpoint_run$R) + x1*1/sqrt(E)
     } else if (type == "PIM") {
-      x1 = pim_find_x1(bestpoint_run$Z1, bestpoint_run$Z2, bestpoint_run$L,
-                       bestpoint_run$V1, bestpoint_run$V2)
-      tmp = pim_tofperiod(E = E, bestpoint_run$Z1, bestpoint_run$Z2,
-                          bestpoint_run$L, bestpoint_run$V1, bestpoint_run$V2) + x1*1/sqrt(E)
+      z = c(bestpoint_run$Z1, bestpoint_run$Z2, bestpoint_run$Z3, bestpoint_run$Z4, bestpoint_run$L)
+      V = c(0, bestpoint_run$V1, bestpoint_run$V2, bestpoint_run$V3, bestpoint_run$V4)
+      x1 = pim_find_x1(z, V)
+      # x1 = 5
+      tmp = pim_tofperiod(E = E, z, V) + x1*1/sqrt(E)
     }
     bestpoint_result$res = 1/stats::sd(tmp)
+    bestpoint_result$x1 = x1
     # plot
     graphics::lines((E-1)*100, (tmp-tmp[ceiling(length(E)/2)])/tmp[ceiling(length(E)/2)]*1e6, 
                     col = grDevices::rgb(1,0,0,1))

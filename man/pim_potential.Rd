@@ -4,20 +4,17 @@
 \alias{pim_potential}
 \title{Calculates the axial potential of a planar three-element ion mirror.}
 \usage{
-pim_potential(x, z1, z2, L, V1, V2)
+pim_potential(x, z, V)
 }
 \arguments{
 \item{x}{Axial distance from the entrance grid (normalized with H).}
 
-\item{z1}{Distance where electrode 1 starts (normalized with H).}
+\item{z}{Vector of electrode distances (normalized with H). \code{z[1]} it
+the end of the entrance grid electrode and \code{z[length(z)]} is the total
+length of the mirror.}
 
-\item{z2}{Distance where electrode 2 starts (normalized with H).}
-
-\item{L}{Total length of the mirror, i.e. disance where end cap is (normalized with H).}
-
-\item{V1}{Voltage of electrode 1.}
-
-\item{V2}{Voltage of electrode 2.
+\item{V}{Vector of electrode voltages. The entrance grid and the first
+electrode are assumed to be grounded (\code{V[1]=0}).
 
 All distances are normalized with the height of the mirror electrodes H 
 (which is the same for all electrodes).}

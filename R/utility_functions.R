@@ -537,11 +537,11 @@ U0 = function(V, z) {
 #' three-element ion mirror.
 #'
 #' @param x Axial distance from the entrance grid (normalized with H).
-#' @param z1 Distance where electrode 1 starts (normalized with H).
-#' @param z2 Distance where electrode 2 starts (normalized with H).
-#' @param L Total length of the mirror, i.e. disance where end cap is (normalized with H).
-#' @param V1 Voltage of electrode 1.
-#' @param V2 Voltage of electrode 2.
+#' @param z Vector of electrode distances (normalized with H). \code{z[1]} it
+#' the end of the entrance grid electrode and \code{z[length(z)]} is the total
+#' length of the mirror.
+#' @param V Vector of electrode voltages. The entrance grid and the first
+#' electrode are assumed to be grounded (\code{V[1]=0}).
 #' 
 #' All distances are normalized with the height of the mirror electrodes H 
 #' (which is the same for all electrodes).
@@ -555,11 +555,32 @@ U0 = function(V, z) {
 #' 
 #' @keywords internal
 #' @export
-pim_potential = function(x, z1, z2, L, V1, V2) {
+pim_potential = function(x, z, V) {
+  Vx = rep(0, length(x))
+  n = length(z)
+  if (n<2) stop("z and V need to be vectors with at least two elements.")
+  for (i in 1:(n-1)) {
+    # Vx = Vx + U0(V[i+1], x-z[i]) - U0(V[i+1], x-z[i+1]) -
+    # U0(V[i+1], -x-z[i]) + U0(V[i+1], -x-z[i+1]) -
+    #   U0(V[i+1], -x+2*z[n]-z[i]) + U0(V[i+1], -x+2*z[n]-z[i+1]) +
+    #   U0(V[i+1], x+2*z[n]-z[i]) - U0(V[i+1], x+2*z[n]-z[i+1]) +
+    #   U0(V[i+1], x-2*z[n]-z[i]) - U0(V[i+1], x-2*z[n]-z[i+1]) -
+    #   U0(V[i+1], -x-2*z[n]-z[i]) + U0(V[i+1], -x-2*z[n]-z[i+1]) -
+    #   U0(V[i+1], -x+4*z[n]-z[i]) + U0(V[i+1], -x+4*z[n]-z[i+1]) +
+    #   U0(V[i+1], x+4*z[n]-z[i]) - U0(V[i+1], x+4*z[n]-z[i+1]) +
+    #   U0(V[i+1], x-4*z[n]-z[i]) - U0(V[i+1], x-4*z[n]-z[i+1]) -
+    #   U0(V[i+1], -x-4*z[n]-z[i]) + U0(V[i+1], -x-4*z[n]-z[i+1]) -
+    #   U0(V[i+1], -x+6*z[n]-z[i]) + U0(V[i+1], -x+6*z[n]-z[i+1])
+    Vx = Vx + U0(V[i+1], x-z[i]) - U0(V[i+1], x-z[i+1])
+    for (j in 1:4) {
+      Vx = Vx - (U0(V[i+1],-x+2*j*z[n]-z[i]) - U0(V[i+1],-x+2*j*z[n]-z[i+1]) +
+                   U0(V[i+1],-x-2*(j-1)*z[n]-z[i]) - U0(V[i+1],-x-2*(j-1)*z[n]-z[i+1])) +
+        (U0(V[i+1],x+2*j*z[n]-z[i]) - U0(V[i+1],x+2*j*z[n]-z[i+1]) +
+           U0(V[i+1],x-2*j*z[n]-z[i]) - U0(V[i+1],x-2*j*z[n]-z[i+1]))
+    }
+  }
+  Vx = Vx + 2*(U0(V[n], x-z[n]) - U0(V[n], -x-z[n]))  # end cap
   
-  Vx = U0(V1, x-z1) - U0(V1, x-z2) + U0(V1, x+z1) - U0(V1, x+z2) +
-    U0(V2, -x+L) - U0(V2,-x+2*L-z2) + U0(V2,-x+L) - U0(V2,-x+z2) + 2*U0(V2,x-L)
-    
   return(Vx)
 }
 
@@ -573,11 +594,11 @@ pim_potential = function(x, z1, z2, L, V1, V2) {
 #' point inside the mirror for a given kinetic energy.
 #' 
 #' @param x Axial distance from the entrance grid (normalized with H).
-#' @param z1 Distance where electrode 1 starts (normalized with H).
-#' @param z2 Distance where electrode 2 starts (normalized with H).
-#' @param L Total length of the mirror, i.e. disance where end cap is (normalized with H).
-#' @param V1 Voltage of electrode 1.
-#' @param V2 Voltage of electrode 2.
+#' @param z Vector of electrode distances (normalized with H). \code{z[1]} it
+#' the end of the entrance grid electrode and \code{z[length(z)]} is the total
+#' length of the mirror.
+#' @param V Vector of electrode voltages. The entrance grid and the first
+#' electrode are assumed to be grounded (\code{V[1]=0}).
 #' 
 #' All distances are normalized with the height of the mirror electrodes H 
 #' (which is the same for all electrodes).
@@ -586,9 +607,9 @@ pim_potential = function(x, z1, z2, L, V1, V2) {
 #' 
 #' @keywords internal
 #' @export
-pim_potential_inv = function(y, z1, z2, L, V1, V2) {
-  stats::uniroot((function(x,z1,z2,L,V1,V2) pim_potential(x,z1,z2,L,V1,V2)-y), 
-                 interval = c(0,L), z1, z2, L, V1, V2, tol = 1e-15)$root
+pim_potential_inv = function(y, z, V) {
+  stats::uniroot((function(x,z,V) pim_potential(x,z,V)-y), 
+                 interval = c(0,z[length(z)]), z, V, tol = 1e-15)$root
 }
 
 # PIM integrand for tof period calculation -----------------------------------------
@@ -598,11 +619,11 @@ pim_potential_inv = function(y, z1, z2, L, V1, V2) {
 #' 
 #' @param x Axial distance from the entrance grid (normalized with H).
 #' @param E Potential energy at the turning point (normalized with H).
-#' @param z1 Distance where electrode 1 starts (normalized with H).
-#' @param z2 Distance where electrode 2 starts (normalized with H).
-#' @param L Total length of the mirror, i.e. disance where end cap is (normalized with H).
-#' @param V1 Voltage of electrode 1.
-#' @param V2 Voltage of electrode 2.
+#' @param z Vector of electrode distances (normalized with H). \code{z[1]} it
+#' the end of the entrance grid electrode and \code{z[length(z)]} is the total
+#' length of the mirror.
+#' @param V Vector of electrode voltages. The entrance grid and the first
+#' electrode are assumed to be grounded (\code{V[1]=0}).
 #' 
 #' All distances are normalized with the height of the mirror electrodes H 
 #' (which is the same for all electrodes).
@@ -611,12 +632,9 @@ pim_potential_inv = function(y, z1, z2, L, V1, V2) {
 #' 
 #' @keywords internal
 #' @export
-pim_integrand = function(x, E, z1, z2, L, V1, V2) {
+pim_integrand = function(x, E, z, V) {
 
-  Vx = U0(V1, x-z1) - U0(V1, x-z2) + U0(V1, x+z1) - U0(V1, x+z2) +
-    U0(V2, -x+L) - U0(V2,-x+2*L-z2) + U0(V2,-x+L) - U0(V2,-x+z2) + 2*U0(V2,x-L)
-  
-  Vx = 1/sqrt(E - Vx)
+  Vx = 1/sqrt(E - pim_potential(x, z, V))
   
   return(Vx)
 }
@@ -632,11 +650,11 @@ pim_integrand = function(x, E, z1, z2, L, V1, V2) {
 #' and the time-of-flight is in arbitrary units.
 #' 
 #' @param E Potential energy at the turning point.
-#' @param z1 Distance where electrode 1 starts (normalized with H).
-#' @param z2 Distance where electrode 2 starts (normalized with H).
-#' @param L Total length of the mirror, i.e. disance where end cap is (normalized with H).
-#' @param V1 Voltage of electrode 1.
-#' @param V2 Voltage of electrode 2.
+#' @param z Vector of electrode distances (normalized with H). \code{z[1]} it
+#' the end of the entrance grid electrode and \code{z[length(z)]} is the total
+#' length of the mirror.
+#' @param V Vector of electrode voltages. The entrance grid and the first
+#' electrode are assumed to be grounded (\code{V[1]=0}).
 #' 
 #' All distances are normalized with the height of the mirror electrodes H 
 #' (which is the same for all electrodes).
@@ -645,10 +663,10 @@ pim_integrand = function(x, E, z1, z2, L, V1, V2) {
 #' 
 #' @keywords internal
 #' @export
-pim_tofperiod = function(E, z1, z2, L, V1, V2) {
-  x0 = sapply(E, pim_potential_inv, z1, z2, L, V1, V2)
-  tof = mapply(function(x0, E) stats::integrate(pim_integrand, 0, x0, E, z1, 
-                                                z2, L, V1, V2, rel.tol = 1e-6)$value, x0, E)
+pim_tofperiod = function(E, z, V) {
+  x0 = sapply(E, pim_potential_inv, z, V)
+  tof = mapply(function(x0, E) stats::integrate(pim_integrand, 0, x0, E, z, V,
+                                                rel.tol = 1e-6)$value, x0, E)
   return(tof)
 }
 
@@ -657,11 +675,11 @@ pim_tofperiod = function(E, z1, z2, L, V1, V2) {
 #'
 #' \code{pim_find_x1} finds the time-of-flight focal point of the mirror.
 #' 
-#' @param z1 Distance where electrode 1 starts (normalized with H).
-#' @param z2 Distance where electrode 2 starts (normalized with H).
-#' @param L Total length of the mirror, i.e. disance where end cap is (normalized with H).
-#' @param V1 Voltage of electrode 1.
-#' @param V2 Voltage of electrode 2.
+#' @param z Vector of electrode distances (normalized with H). \code{z[1]} it
+#' the end of the entrance grid electrode and \code{z[length(z)]} is the total
+#' length of the mirror.
+#' @param V Vector of electrode voltages. The entrance grid and the first
+#' electrode are assumed to be grounded (\code{V[1]=0}).
 #' 
 #' All distances are normalized with the height of the mirror electrodes H 
 #' (which is the same for all electrodes).
@@ -670,12 +688,12 @@ pim_tofperiod = function(E, z1, z2, L, V1, V2) {
 #' 
 #' @keywords internal
 #' @export
-pim_find_x1 = function(z1, z2, L, V1, V2) {
+pim_find_x1 = function(z, V) {
   E = seq(0.99, 1.01, length.out = 2)
   x1 = 0
   dx = 10
   repeat {
-    tmp = pim_tofperiod(E = E, z1, z2, L, V1, V2) + x1*1/sqrt(E)
+    tmp = pim_tofperiod(E = E, z, V) + x1*1/sqrt(E)
     if (diff(tmp) < 0) {
       x1 = x1 - dx
       dx = dx/10
