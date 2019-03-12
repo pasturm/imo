@@ -191,9 +191,8 @@ run_imo = function(imo_config, resume = FALSE,
       result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
         z = c(runs$Z1[i], runs$Z2[i], runs$Z3[i], runs$Z4[i], runs$L[i])
         V = c(0, runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i])
-        x1 = pim_find_x1(z, V)
-        # x1 = 5
-        tmp = pim_tofperiod(E = E, z, V) + x1*1/sqrt(E)
+        x1 = pim_find_x1(z, V, runs$D5[i], runs$U5[i])
+        tmp = pim_totaltof(E = E, z, V, x1, runs$D5[i], runs$U5[i])
         return(c(i, 1/stats::sd(tmp), x1, tmp))
       }
     }
@@ -273,9 +272,6 @@ run_imo = function(imo_config, resume = FALSE,
     }
     
     # run experiment
-    print(paste(paste0("Best point verification run:"),
-                paste0(names(bestpoint_run), "=", round(bestpoint_run,2), collapse = ", ")))
-    
     utils::write.table(signif(bestpoint_run, 12), 
                        file = file.path(imo_dir, resultdir, "bestpoint_run.txt"), 
                        sep = "|", row.names = FALSE, col.names = TRUE, eol = "|\n")
@@ -299,12 +295,15 @@ run_imo = function(imo_config, resume = FALSE,
     } else if (type == "PIM") {
       z = c(bestpoint_run$Z1, bestpoint_run$Z2, bestpoint_run$Z3, bestpoint_run$Z4, bestpoint_run$L)
       V = c(0, bestpoint_run$V1, bestpoint_run$V2, bestpoint_run$V3, bestpoint_run$V4)
-      x1 = pim_find_x1(z, V)
-      # x1 = 5
-      tmp = pim_tofperiod(E = E, z, V) + x1*1/sqrt(E)
+      x1 = pim_find_x1(z, V, bestpoint_run$D5, bestpoint_run$U5)
+      tmp = pim_totaltof(E = E, z, V, x1, bestpoint_run$D5, bestpoint_run$U5)
     }
     bestpoint_result$res = 1/stats::sd(tmp)
     bestpoint_result$x1 = x1
+    
+    print(paste0(paste0("Best point: "),
+                paste0(names(bestpoint_run), "=", round(bestpoint_run,2), collapse = ", "), 
+                ", x1=", round(x1,2)))
     # plot
     graphics::lines((E-1)*100, (tmp-tmp[ceiling(length(E)/2)])/tmp[ceiling(length(E)/2)]*1e6, 
                     col = grDevices::rgb(1,0,0,1))

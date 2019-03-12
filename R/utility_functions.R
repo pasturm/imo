@@ -670,7 +670,39 @@ pim_tofperiod = function(E, z, V) {
   return(tof)
 }
 
-# PIM tof focus point --------------------------------------------------------------
+# PIM total tof -------------------------------------------------------------------
+#' Time-of-flight period calculation.
+#'
+#' \code{pim_totaltof} calculates the total time-of-flight including field-free
+#' space and linear stage of the mirror.
+#' 
+#' Because here we are only interested in relative time-of-flight 
+#' deviations all constant factors (e.g. \code{2*sqrt(2*m*amu/e)}) are omitted 
+#' and the time-of-flight is in arbitrary units.
+#' 
+#' @param E Potential energy at the turning point.
+#' @param z Vector of electrode distances (normalized with H). \code{z[1]} it
+#' the end of the entrance grid electrode and \code{z[length(z)]} is the total
+#' length of the mirror.
+#' @param V Vector of electrode voltages. The entrance grid and the first
+#' electrode are assumed to be grounded (\code{V[1]=0}).
+#' @param x1 Focal distance of mirror (normalized with H).
+#' @param d5 Distance of first linear stage of mirror (normalized with H).
+#' @param u5 Potential in first linear stage of mirror.
+#' 
+#' All distances are normalized with the height of the mirror electrodes H 
+#' (which is the same for all electrodes).
+#'
+#' @return time-of-flight.
+#' 
+#' @keywords internal
+#' @export
+pim_totaltof = function(E, z, V, x1, d5 = 0, u5 = 0) {
+  tof = pim_tofperiod(E, z, V) + x1*1/sqrt(E+u5) + 4*d5/u5*(sqrt(E+u5)-sqrt(E))
+  return(tof)
+}
+
+# PIM tof focal point --------------------------------------------------------------
 #' Finds the time-of-flight focal point of the mirror.
 #'
 #' \code{pim_find_x1} finds the time-of-flight focal point of the mirror.
@@ -680,20 +712,22 @@ pim_tofperiod = function(E, z, V) {
 #' length of the mirror.
 #' @param V Vector of electrode voltages. The entrance grid and the first
 #' electrode are assumed to be grounded (\code{V[1]=0}).
+#' @param d5 Distance of first linear stage of mirror (normalized with H).
+#' @param u5 Potential in first linear stage of mirror.
 #' 
 #' All distances are normalized with the height of the mirror electrodes H 
 #' (which is the same for all electrodes).
 #'
-#' @return time-of-flight.
+#' @return focal point.
 #' 
 #' @keywords internal
 #' @export
-pim_find_x1 = function(z, V) {
+pim_find_x1 = function(z, V, d5 = 0, u5 = 0) {
   E = seq(0.99, 1.01, length.out = 2)
   x1 = 0
   dx = 10
   repeat {
-    tmp = pim_tofperiod(E = E, z, V) + x1*1/sqrt(E)
+    tmp = pim_totaltof(E, z, V, x1, d5, u5)
     if (diff(tmp) < 0) {
       x1 = x1 - dx
       dx = dx/10
