@@ -14,8 +14,8 @@ tuneR_config file, if \code{TRUE} starting values are taken from the last
 bestpoint_run.txt (see 'Details').}
 
 \item{type}{Ion mirror type. Currently supported are \code{"GLPM"}: gridless
-planar mirrors, \code{"ZEIM"}: cylindrical Zhang-Enke three-element mirrors,
-\code{"PIM"}: planar three-element mirrors.}
+planar mirrors, \code{"ZEIM"}: cylindrical Zhang-Enke three-element ion 
+mirrors, \code{"PIM"}: planar ion mirrors.}
 }
 \description{
 \code{run_imo} runs ion mirror optimization.

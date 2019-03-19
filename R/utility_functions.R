@@ -303,7 +303,7 @@ glpm_integrand = function(x, E, L, V, H) {
 #' 
 #' This integrates the particle motion from the turning point x0 to the distance
 #' x1. Because here we are only interested in relative time-of-flight deviations
-#' all constant factors (e.g. \code{2*sqrt(2*m*amu/e)}) are omitted and the 
+#' all constant factors (e.g. \code{sqrt(m*amu/e/2)}) are omitted and the 
 #' time-of-flight is in arbitrary units.
 #' 
 #' @param E Vector of potential energies at the turning point (normalized with
@@ -472,7 +472,7 @@ zeim_integrand = function(x, E, z1, z2, L, V1, V2, R) {
 #' 
 #' This integrates the particle motion from the entrance grid to the turning 
 #' point x0. Because here we are only interested in relative time-of-flight 
-#' deviations all constant factors (e.g. \code{2*sqrt(2*m*amu/e)}) are omitted 
+#' deviations all constant factors (e.g. \code{sqrt(m*amu/e/2)}) are omitted 
 #' and the time-of-flight is in arbitrary units.
 #' 
 #' @param E Potential energy at the turning point.
@@ -646,7 +646,7 @@ pim_integrand = function(x, E, z, V) {
 #' 
 #' This integrates the particle motion from the entrance grid to the turning 
 #' point x0. Because here we are only interested in relative time-of-flight 
-#' deviations all constant factors (e.g. \code{2*sqrt(2*m*amu/e)}) are omitted 
+#' deviations all constant factors (e.g. \code{sqrt(m*amu/e/2)}) are omitted 
 #' and the time-of-flight is in arbitrary units.
 #' 
 #' @param E Potential energy at the turning point.
@@ -677,7 +677,7 @@ pim_tofperiod = function(E, z, V) {
 #' space and linear stage of the mirror.
 #' 
 #' Because here we are only interested in relative time-of-flight 
-#' deviations all constant factors (e.g. \code{2*sqrt(2*m*amu/e)}) are omitted 
+#' deviations all constant factors (e.g. \code{sqrt(m*amu/e/2)}) are omitted 
 #' and the time-of-flight is in arbitrary units.
 #' 
 #' @param E Potential energy at the turning point.
@@ -698,7 +698,13 @@ pim_tofperiod = function(E, z, V) {
 #' @keywords internal
 #' @export
 pim_totaltof = function(E, z, V, x1, d5 = 0, u5 = 0) {
-  tof = pim_tofperiod(E, z, V) + x1*1/sqrt(E+u5) + 4*d5/u5*(sqrt(E+u5)-sqrt(E))
+  if (u5 != 0) {
+    tof = pim_tofperiod(E, z, V) + x1*1/sqrt(E+u5) + 2*d5/u5*(sqrt(E+u5)-sqrt(E))
+  } else {
+    tof = pim_tofperiod(E, z, V) + x1*1/sqrt(E)
+  }
+  # note: this is actually only half of the tof: from x1 to the return point in
+  # the mirror.
   return(tof)
 }
 

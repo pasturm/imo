@@ -28,7 +28,7 @@ time-of-flight.
 \details{
 This integrates the particle motion from the entrance grid to the turning 
 point x0. Because here we are only interested in relative time-of-flight 
-deviations all constant factors (e.g. \code{2*sqrt(2*m*amu/e)}) are omitted 
+deviations all constant factors (e.g. \code{sqrt(m*amu/e/2)}) are omitted 
 and the time-of-flight is in arbitrary units.
 }
 \keyword{internal}
