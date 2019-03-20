@@ -1,4 +1,4 @@
-# GPIMimo configuration file
+# PIMo configuration file
 
 # Number of processes for running R in parallel
 np = 4
@@ -12,22 +12,33 @@ n_repeats = 10
 
 # Response variables
 [responses]
-1 = {Name = "Resolving power", Target = 10000, Weight = 1}
+1 = {Name = "Resolving power", Target = 1e6, Weight = 1}
 
 # Factors
 # Note: between 3 and 7 factors need to be enabled
 [factors]
 1  = { Name = "v1", Enabled = 1, Transformation = "V1", Range = 0.02, LowLimit = 0, HighLimit = 1.5 }
-2  = { Name = "v2", Enabled = 0, Transformation = "V2", Range = 0.02, LowLimit = 1, HighLimit = 1.5 }
-3  = { Name = "z1", Enabled = 0, Transformation = "Z1", Range = 0.02, LowLimit = 0, HighLimit = 10 }
-4  = { Name = "z2", Enabled = 0, Transformation = "Z2", Range = 0.02, LowLimit = 0, HighLimit = 10 }
-5  = { Name = "l", Enabled = 1, Transformation = "L", Range = 0.02, LowLimit = 0, HighLimit = 10 }
+2  = { Name = "v2", Enabled = 0, Transformation = "V2", Range = 0.02, LowLimit = 0, HighLimit = 2 }
+3  = { Name = "v3", Enabled = 0, Transformation = "V3", Range = 0.02, LowLimit = 0, HighLimit = 2 }
+4  = { Name = "v4", Enabled = 1, Transformation = "V4", Range = 0.02, LowLimit = 1, HighLimit = 2 }
+5  = { Name = "z1", Enabled = 1, Transformation = "Z1", Range = 0.02, LowLimit = 0, HighLimit = 10 }
+6  = { Name = "z2", Enabled = 0, Transformation = "Z2", Range = 0.02, LowLimit = 0, HighLimit = 10 }
+7  = { Name = "z3", Enabled = 0, Transformation = "Z3", Range = 0.02, LowLimit = 0, HighLimit = 10 }
+8  = { Name = "z4", Enabled = 1, Transformation = "Z4", Range = 0.02, LowLimit = 0, HighLimit = 1 }
+9  = { Name = "l", Enabled = 0, Transformation = "L", Range = 0.01, LowLimit = 0, HighLimit = 10 }
+10 = { Name = "d5", Enabled = 0, Transformation = "D5", Range = 0.01, LowLimit = 0, HighLimit = 10 }
+11 = { Name = "u5", Enabled = 0, Transformation = "U5", Range = 0.01, LowLimit = 0, HighLimit = 10 }
 
 # Controls
 [controls]
-1  = { Name = "V1", Transformation = "v1", StartValue = 1.1 }
-2  = { Name = "V2", Transformation = "v2", StartValue = 0.9 }
-3  = { Name = "Z1", Transformation = "z1", StartValue = 0.7 }
-4  = { Name = "Z2", Transformation = "z2", StartValue = 1.7 }
-5  = { Name = "L", Transformation = "l", StartValue = 2 }
-
+1  = { Name = "V1", Transformation = "v1", StartValue = 0.8 }
+2  = { Name = "V2", Transformation = "v2", StartValue = 0 }
+3  = { Name = "V3", Transformation = "v3", StartValue = 0 }
+4  = { Name = "V4", Transformation = "v4", StartValue = 1.2 }  # end cap voltage
+5  = { Name = "Z1", Transformation = "z1", StartValue = 0.4 }
+6  = { Name = "Z2", Transformation = "z4", StartValue = 0 }  # set to z4 if less than four mirror elements are used.
+7  = { Name = "Z3", Transformation = "z4", StartValue = 0 }  # set to z4 if less than five mirror elements are used.
+8  = { Name = "Z4", Transformation = "z4", StartValue = 0.9 }
+9  = { Name = "L", Transformation = "l", StartValue = 1 }
+10 = { Name = "D5", Transformation = "d5", StartValue = 0 }
+11 = { Name = "U5", Transformation = "u5", StartValue = 0 }
