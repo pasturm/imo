@@ -744,3 +744,90 @@ pim_find_x1 = function(z, V, d5 = 0, u5 = 0) {
   if (x1<0) stop("x1 < 0")
   return(x1)
 }
+
+# SNLM correction integrand ----------------------------------------------------
+snlm_int = function(y, a, b, u1, u3, u5, u6, d1, d3, d4, d5, d6, x0) {
+  k = x0/d1
+  f1 = 2*d1/sqrt(u1)*(sqrt(k)) +
+       2*d3/u3*(sqrt(k*u1+u3)-sqrt(k*u1)) +
+       d4/sqrt(k*u1+u3) +
+       4*d5/u5*(sqrt(k*u1+u3)-sqrt(k*u1+u3-u5)) +
+       4*d6/u6*sqrt(k*u1+u3-u5)
+  x = (a-y)*d1/u1
+  k = (x0-x)/d1
+  f2 = 2*d1/sqrt(u1)*(sqrt(k)) +
+       2*d3/u3*(sqrt(k*u1+u3)-sqrt(k*u1)) +
+       d4/sqrt(k*u1+u3) +
+       4*d5/u5*(sqrt(k*u1+u3)-sqrt(k*u1+u3-u5)) +
+       4*d6/u6*sqrt(k*u1+u3-u5)
+  f = (f1 - f2)/sqrt(b-y)
+  return(f)
+}
+
+# SNLM potential ---------------------------------------------------------------
+#' Calculates the potential of a Shimadzu non-linear mirror.
+#'
+#' \code{snlm_potential} calculates the potential of a Shimadzu non-linear 
+#' mirror, which is a linear two-stage ion mirror with a non-linear correction
+#' potential in the second stage.
+#'
+#' @param d1 Distance of first stage of extractor, from push to pull (m).
+#' @param d3 Distance of second stage of extractor, from pull to drift (m).
+#' @param d4 Distance of of drift space, from extractor to reflector and from
+#' reflector to detector (m).
+#' @param d5 Distance of first stage of reflector (m).
+#' @param d6 Distance of second stage of reflector (m).
+#' @param shift Reference energy shift inside extractor (m).
+#' @param drift Drift tube voltage (V).
+#' @param pulse Extraction pulse voltage (V).
+#'
+#' @return A data.frame with the corrected total distance, the corresponding 
+#' potential and the distance correction in the second stage of the mirror.
+#'
+#' @references U.S. Patent No. 8,772,708 B2 (filed Dec. 20, 2011).
+#' 
+#' @keywords internal
+#' @export
+snlm_potential = function(d1, d3, d4, d5, d6, shift, drift, pulse) {
+  
+  u1 = 2*pulse
+  u3 = -pulse - drift
+  x0 = d1 - 0.001 - shift
+  k0 = x0/d1
+  p0 = k0 + u3/u1
+  a = d1/u1*k0^(-1/2) + d3/u3*(p0^(-1/2)-k0^(-1/2)) - d4/u1/2*p0^(-3/2)
+  b = d1/u1/2*k0^(-3/2) + d3/u3/2*(p0^(-3/2)-k0^(-3/2)) - d4/u1*3/4*p0^(-5/2)
+  u5 = (a - 2*p0*b + 2*d5/u1*p0^(-3/2))/(-2*b/u1)
+  u6 = (-2*d6*(p0-u5/u1)^(-1/2))/(a + 2*d5/u5*(p0^(-1/2)-(p0-u5/u1)^(-1/2)))
+  
+  E0 = u1*x0/d1+u3
+  
+  # double-exponential transformation for fast numerical itegration
+  a = E0  # lower integration boundary
+  h = 0.1  # step size   
+  l = seq(0+h/2, 2.5-h/2, h)
+  phi = tanh(pi/2*sinh(l))
+  dphi = pi/2*cosh(l)/(cosh(pi/2*sinh(l))^2)
+  
+  U = seq(E0+1, max(u1+u3, u5+u6), 1)
+  if ((u5+u6)<(u1+u3)) { # reflector too short
+    d6plus = d6*((u1+u3) - (u5+u6))/u6
+    print(paste("reflector needs to be longer by at least", d6plus, "m"))
+  }
+  xc = rep(0, length(U))
+  
+  for (i in 1:length(U)) {
+    b = U[i]  # upper integration boundary
+    c = (b-a)/2  # variable transformation
+    d = (a+b)/2  # variable transformation
+    xc[i] = 1/2/pi*c*h*
+      sum((snlm_int(c*phi+d,a,b,u1,u3,u5,u6,d1,d3,d4,d5,d6,x0) +
+             snlm_int(-c*phi+d,a,b,u1,u3,u5,u6,d1,d3,d4,d5,d6,x0))*dphi)
+  }
+  
+  xa = d6*(U-u5)/u6
+  x = xa + xc
+  U0 = u6/d6*xa
+  ret = data.frame(x = x, U = U0, xc = xc)
+  return(ret)
+}
