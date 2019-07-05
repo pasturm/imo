@@ -2,7 +2,7 @@
 % Please edit documentation in R/utility_functions.R
 \name{zeim_potential}
 \alias{zeim_potential}
-\title{Calculates the axial potential of cylindrical Zhang–Enke ion mirrors.}
+\title{Calculates the axial potential of cylindrical Zhang-Enke ion mirrors.}
 \usage{
 zeim_potential(x, z1, z2, L, V1, V2, R)
 }
@@ -26,11 +26,11 @@ Axial potential at \code{x}.
 }
 \description{
 \code{zeim_potential} calculates the axial potential of cylindrical 
-three-element Zhang–Enke ion mirrors.
+three-element Zhang-Enke ion mirrors.
 }
 \references{
 Yefchak, G.E. and Flory, C.A. (2002), Improved method for 
-designing a cylindrical Zhang–Enke ion mirror, \emph{International Journal 
+designing a cylindrical Zhang-Enke ion mirror, \emph{International Journal 
 of Mass Spectrometry}, \strong{214}, 89-94, doi:10.1016/S1387-3806(01)00564-4.
 }
 \keyword{internal}

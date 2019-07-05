@@ -361,10 +361,10 @@ pkg_env$X0 = gsl::bessel_zero_J0(1:pkg_env$m)
 pkg_env$J1 = besselJ(pkg_env$X0,1)
 
 # ZEIM axial potential --------------------------------------------------------------
-#' Calculates the axial potential of cylindrical Zhang–Enke ion mirrors.
+#' Calculates the axial potential of cylindrical Zhang-Enke ion mirrors.
 #'
 #' \code{zeim_potential} calculates the axial potential of cylindrical 
-#' three-element Zhang–Enke ion mirrors.
+#' three-element Zhang-Enke ion mirrors.
 #'
 #' @param x Axial distance from the entrance grid.
 #' @param z1 Distance where electrode 1 starts.
@@ -377,7 +377,7 @@ pkg_env$J1 = besselJ(pkg_env$X0,1)
 #' @return Axial potential at \code{x}.
 #'
 #' @references Yefchak, G.E. and Flory, C.A. (2002), Improved method for 
-#' designing a cylindrical Zhang–Enke ion mirror, \emph{International Journal 
+#' designing a cylindrical Zhang-Enke ion mirror, \emph{International Journal 
 #' of Mass Spectrometry}, \strong{214}, 89-94, doi:10.1016/S1387-3806(01)00564-4.
 #' 
 #' @keywords internal
@@ -531,13 +531,13 @@ U0 = function(V, z) {
 }
 
 # PIM axial potential --------------------------------------------------------------
-#' Calculates the axial potential of a planar three-element ion mirror.
+#' Calculates the axial potential of a planar multi-element ion mirror.
 #'
 #' \code{pim_potential} calculates the axial potential of a planar 
-#' three-element ion mirror.
+#' multi-element ion mirror with entrance grid.
 #'
 #' @param x Axial distance from the entrance grid (normalized with H).
-#' @param z Vector of electrode distances (normalized with H). \code{z[1]} it
+#' @param z Vector of electrode distances (normalized with H). \code{z[1]} is
 #' the end of the entrance grid electrode and \code{z[length(z)]} is the total
 #' length of the mirror.
 #' @param V Vector of electrode voltages. The entrance grid and the first

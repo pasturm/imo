@@ -178,7 +178,7 @@ run_imo = function(imo_config, resume = FALSE,
         V = c(runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i], runs$V5[i], runs$V6[i])
         x1 = glpm_find_x1(L, V, H)
         tmp = glpm_tofperiod(E = E, x1 = x1, L, V, H)
-        return(c(i, 1/stats::sd(tmp), tmp))
+        return(c(i, 1/stats::sd(tmp), x1, tmp))
       }
     } else if (type == "ZEIM") {
       result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {

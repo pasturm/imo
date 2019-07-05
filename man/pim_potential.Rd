@@ -2,14 +2,14 @@
 % Please edit documentation in R/utility_functions.R
 \name{pim_potential}
 \alias{pim_potential}
-\title{Calculates the axial potential of a planar three-element ion mirror.}
+\title{Calculates the axial potential of a planar multi-element ion mirror.}
 \usage{
 pim_potential(x, z, V)
 }
 \arguments{
 \item{x}{Axial distance from the entrance grid (normalized with H).}
 
-\item{z}{Vector of electrode distances (normalized with H). \code{z[1]} it
+\item{z}{Vector of electrode distances (normalized with H). \code{z[1]} is
 the end of the entrance grid electrode and \code{z[length(z)]} is the total
 length of the mirror.}
 
@@ -24,7 +24,7 @@ Axial potential at \code{x}.
 }
 \description{
 \code{pim_potential} calculates the axial potential of a planar 
-three-element ion mirror.
+multi-element ion mirror with entrance grid.
 }
 \references{
 Yavor, M.I. et al. (2018), High performance gridless ion mirrors 
