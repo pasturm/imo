@@ -11,7 +11,7 @@ glpm_potential(x, L, V, H)
 
 \item{L}{Vector of electrode lengths normalized with H ("lenght"/\code{H}).}
 
-\item{V}{Vector of voltages normalized with the mean energy ("voltage"/K_0)}
+\item{V}{Vector of voltages normalized with the mean energy ("voltage"/K_0).}
 
 \item{H}{Height of the mirror electrodes (the same for all electrodes).}
 }

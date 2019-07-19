@@ -202,12 +202,14 @@ run_imo = function(imo_config, resume = FALSE,
     
     # plot
     tmp = result[,!(names(result) %in% c("no", "res", "x1"))]
+    ymin = min((tmp-tmp[,ceiling(length(E)/2)])/tmp[,ceiling(length(E)/2)]*1e6)
+    ymax = max((tmp-tmp[,ceiling(length(E)/2)])/tmp[,ceiling(length(E)/2)]*1e6)
     graphics::plot((E-1)*100, (tmp[1,]-tmp[1,ceiling(length(E)/2)])/tmp[1,ceiling(length(E)/2)]*1e6,
-                   type = "l", col = grDevices::rgb(0,0,0,0.3), main = paste("Repeat", k),
+                   type = "n", main = paste("Repeat", k), ylim = c(ymin, ymax),
                    ylab = expression(paste(Delta,"tof/tof") ~ "/" ~ 10^{6}),
                    xlab = expression(paste(Delta,"E/E") ~ "/"~ 100))
     graphics::grid()
-    for (i in 2:length(tmp[,1])) {
+    for (i in 1:length(tmp[,1])) {
       graphics::lines((E-1)*100, (tmp[i,]-tmp[i,ceiling(length(E)/2)])/tmp[i,ceiling(length(E)/2)]*1e6, 
                       col = grDevices::rgb(0,0,0,0.3))
     }
@@ -301,12 +303,13 @@ run_imo = function(imo_config, resume = FALSE,
     bestpoint_result$res = 1/stats::sd(tmp)
     bestpoint_result$x1 = x1
     
-    print(paste0(paste0("Best point: "),
-                paste0(names(bestpoint_run), "=", round(bestpoint_run,2), collapse = ", "), 
-                ", x1=", round(x1,2)))
+    print(paste0("Best point: ", paste0(names(bestpoint_run), "=", 
+                                        round(bestpoint_run,3), collapse = "|"),
+                 "|x1=", round(x1,2)))
     # plot
     graphics::lines((E-1)*100, (tmp-tmp[ceiling(length(E)/2)])/tmp[ceiling(length(E)/2)]*1e6, 
                     col = grDevices::rgb(1,0,0,1))
+    mtext(paste(round(bestpoint_run,4), collapse = " | "), side = 1, line = -1)
     
     
     utils::write.table(signif(bestpoint_result, 12), 

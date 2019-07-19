@@ -11,15 +11,17 @@ pim_find_x1(z, V, d5 = 0, u5 = 0)
 the end of the entrance grid electrode and \code{z[length(z)]} is the total
 length of the mirror.}
 
-\item{V}{Vector of electrode voltages. The entrance grid and the first
-electrode are assumed to be grounded (\code{V[1]=0}).}
+\item{V}{Vector of normalized electrode potentials. The entrance grid and the 
+first electrode are assumed to be grounded (\code{V[1]=0}).}
 
 \item{d5}{Distance of first linear stage of mirror (normalized with H).}
 
-\item{u5}{Potential in first linear stage of mirror.
+\item{u5}{Normalized potential in first linear stage of mirror.
 
-All distances are normalized with the height of the mirror electrodes H 
-(which is the same for all electrodes).}
+All distances are normalized to the height of the mirror electrodes H 
+(which is the same for all electrodes). The potentials are normalized to
+the mean kinetic energy ("voltage"/K_0) of the (singly-charged) ions with
+\code{u5=0}. With \code{u5!=0}, the normalized kinetic energy is \code{1+u5}.}
 }
 \value{
 focal point.

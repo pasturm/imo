@@ -15,11 +15,12 @@ pim_integrand(x, E, z, V)
 the end of the entrance grid electrode and \code{z[length(z)]} is the total
 length of the mirror.}
 
-\item{V}{Vector of electrode voltages. The entrance grid and the first
-electrode are assumed to be grounded (\code{V[1]=0}).
+\item{V}{Vector of normalized electrode potentials. The entrance grid and the 
+first electrode are assumed to be grounded (\code{V[1]=0}).
 
-All distances are normalized with the height of the mirror electrodes H 
-(which is the same for all electrodes).}
+All distances are normalized to the height of the mirror electrodes H 
+(which is the same for all electrodes) and the potentials are normalized to
+the mean kinetic energy ("voltage"/K_0) of the (singly-charged) ions.}
 }
 \value{
 Axial potential at \code{x}.

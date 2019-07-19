@@ -203,7 +203,7 @@ plot_results = function(pltly, k, n_steps, resultdir, result, runs, bestpoint_ru
 #'
 #' @param x Axial distance from the end electrode.
 #' @param L Vector of electrode lengths normalized with H ("lenght"/\code{H}).
-#' @param V Vector of voltages normalized with the mean energy ("voltage"/K_0)
+#' @param V Vector of voltages normalized with the mean energy ("voltage"/K_0).
 #' @param H Height of the mirror electrodes (the same for all electrodes).
 #'
 #' @return Axial potential at \code{x}.
@@ -540,11 +540,12 @@ U0 = function(V, z) {
 #' @param z Vector of electrode distances (normalized with H). \code{z[1]} is
 #' the end of the entrance grid electrode and \code{z[length(z)]} is the total
 #' length of the mirror.
-#' @param V Vector of electrode voltages. The entrance grid and the first
-#' electrode are assumed to be grounded (\code{V[1]=0}).
+#' @param V Vector of normalized electrode potentials. The entrance grid and the 
+#' first electrode are assumed to be grounded (\code{V[1]=0}).
 #' 
-#' All distances are normalized with the height of the mirror electrodes H 
-#' (which is the same for all electrodes).
+#' All distances are normalized to the height of the mirror electrodes H 
+#' (which is the same for all electrodes) and the potentials are normalized to
+#' the mean kinetic energy ("voltage"/K_0) of the (singly-charged) ions.
 #'
 #' @return Axial potential at \code{x}.
 #'
@@ -597,11 +598,12 @@ pim_potential = function(x, z, V) {
 #' @param z Vector of electrode distances (normalized with H). \code{z[1]} it
 #' the end of the entrance grid electrode and \code{z[length(z)]} is the total
 #' length of the mirror.
-#' @param V Vector of electrode voltages. The entrance grid and the first
-#' electrode are assumed to be grounded (\code{V[1]=0}).
+#' @param V Vector of normalized electrode potentials. The entrance grid and the 
+#' first electrode are assumed to be grounded (\code{V[1]=0}).
 #' 
-#' All distances are normalized with the height of the mirror electrodes H 
-#' (which is the same for all electrodes).
+#' All distances are normalized to the height of the mirror electrodes H 
+#' (which is the same for all electrodes) and the potentials are normalized to
+#' the mean kinetic energy ("voltage"/K_0) of the (singly-charged) ions.
 #'
 #' @return Position x where the axial potential = y.
 #' 
@@ -622,11 +624,12 @@ pim_potential_inv = function(y, z, V) {
 #' @param z Vector of electrode distances (normalized with H). \code{z[1]} it
 #' the end of the entrance grid electrode and \code{z[length(z)]} is the total
 #' length of the mirror.
-#' @param V Vector of electrode voltages. The entrance grid and the first
-#' electrode are assumed to be grounded (\code{V[1]=0}).
+#' @param V Vector of normalized electrode potentials. The entrance grid and the 
+#' first electrode are assumed to be grounded (\code{V[1]=0}).
 #' 
-#' All distances are normalized with the height of the mirror electrodes H 
-#' (which is the same for all electrodes).
+#' All distances are normalized to the height of the mirror electrodes H 
+#' (which is the same for all electrodes) and the potentials are normalized to
+#' the mean kinetic energy ("voltage"/K_0) of the (singly-charged) ions.
 #'
 #' @return Axial potential at \code{x}.
 #' 
@@ -653,11 +656,12 @@ pim_integrand = function(x, E, z, V) {
 #' @param z Vector of electrode distances (normalized with H). \code{z[1]} it
 #' the end of the entrance grid electrode and \code{z[length(z)]} is the total
 #' length of the mirror.
-#' @param V Vector of electrode voltages. The entrance grid and the first
-#' electrode are assumed to be grounded (\code{V[1]=0}).
+#' @param V Vector of normalized electrode potentials. The entrance grid and the 
+#' first electrode are assumed to be grounded (\code{V[1]=0}).
 #' 
-#' All distances are normalized with the height of the mirror electrodes H 
-#' (which is the same for all electrodes).
+#' All distances are normalized to the height of the mirror electrodes H 
+#' (which is the same for all electrodes) and the potentials are normalized to
+#' the mean kinetic energy ("voltage"/K_0) of the (singly-charged) ions.
 #'
 #' @return time-of-flight.
 #' 
@@ -684,14 +688,16 @@ pim_tofperiod = function(E, z, V) {
 #' @param z Vector of electrode distances (normalized with H). \code{z[1]} it
 #' the end of the entrance grid electrode and \code{z[length(z)]} is the total
 #' length of the mirror.
-#' @param V Vector of electrode voltages. The entrance grid and the first
-#' electrode are assumed to be grounded (\code{V[1]=0}).
+#' @param V Vector of normalized electrode potentials. The entrance grid and the 
+#' first electrode are assumed to be grounded (\code{V[1]=0}).
 #' @param x1 Focal distance of mirror (normalized with H).
 #' @param d5 Distance of first linear stage of mirror (normalized with H).
-#' @param u5 Potential in first linear stage of mirror.
+#' @param u5 Normalized potential in first linear stage of mirror.
 #' 
-#' All distances are normalized with the height of the mirror electrodes H 
-#' (which is the same for all electrodes).
+#' All distances are normalized to the height of the mirror electrodes H 
+#' (which is the same for all electrodes). The potentials are normalized to
+#' the mean kinetic energy ("voltage"/K_0) of the (singly-charged) ions with
+#' \code{u5=0}. With \code{u5!=0}, the normalized kinetic energy is \code{1+u5}.
 #'
 #' @return time-of-flight.
 #' 
@@ -716,13 +722,15 @@ pim_totaltof = function(E, z, V, x1, d5 = 0, u5 = 0) {
 #' @param z Vector of electrode distances (normalized with H). \code{z[1]} it
 #' the end of the entrance grid electrode and \code{z[length(z)]} is the total
 #' length of the mirror.
-#' @param V Vector of electrode voltages. The entrance grid and the first
-#' electrode are assumed to be grounded (\code{V[1]=0}).
+#' @param V Vector of normalized electrode potentials. The entrance grid and the 
+#' first electrode are assumed to be grounded (\code{V[1]=0}).
 #' @param d5 Distance of first linear stage of mirror (normalized with H).
-#' @param u5 Potential in first linear stage of mirror.
+#' @param u5 Normalized potential in first linear stage of mirror.
 #' 
-#' All distances are normalized with the height of the mirror electrodes H 
-#' (which is the same for all electrodes).
+#' All distances are normalized to the height of the mirror electrodes H 
+#' (which is the same for all electrodes). The potentials are normalized to
+#' the mean kinetic energy ("voltage"/K_0) of the (singly-charged) ions with
+#' \code{u5=0}. With \code{u5!=0}, the normalized kinetic energy is \code{1+u5}.
 #'
 #' @return focal point.
 #' 
