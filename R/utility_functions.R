@@ -325,7 +325,7 @@ glpm_tofperiod = function(E, x1, L, V, H) {
   return(tof)
 }
 
-# GLPM tof focus point --------------------------------------------------------------
+# GLPM tof focal point --------------------------------------------------------------
 #' Finds the time-of-flight focal point of the mirror.
 #'
 #' \code{glpm_find_x1} finds the time-of-flight focal point of the mirror.
@@ -334,7 +334,7 @@ glpm_tofperiod = function(E, x1, L, V, H) {
 #' @param V Vector of voltages normalized with the mean energy ("voltage"/K_0)
 #' @param H Height of the mirror electrodes (the same for all electrodes).
 #'
-#' @return time-of-flight.
+#' @return focal distance, measured from the back plane.
 #' 
 #' @keywords internal
 #' @export
@@ -506,7 +506,7 @@ zeim_tofperiod = function(E, z1, z2, L, V1, V2, R) {
 #' @param V2 Voltage of electrode 2.
 #' @param R Radius of the cylinder.
 #'
-#' @return time-of-flight.
+#' @return focal point (measured from the entrance grid).
 #' 
 #' @keywords internal
 #' @export
@@ -690,7 +690,8 @@ pim_tofperiod = function(E, z, V) {
 #' length of the mirror.
 #' @param V Vector of normalized electrode potentials. The entrance grid and the 
 #' first electrode are assumed to be grounded (\code{V[1]=0}).
-#' @param x1 Focal distance of mirror (normalized with H).
+#' @param x1 Focal distance of mirror (normalized with H), measured from the 
+#' entrance grid).
 #' @param d5 Distance of first linear stage of mirror (normalized with H).
 #' @param u5 Normalized potential in first linear stage of mirror.
 #' 
@@ -732,7 +733,7 @@ pim_totaltof = function(E, z, V, x1, d5 = 0, u5 = 0) {
 #' the mean kinetic energy ("voltage"/K_0) of the (singly-charged) ions with
 #' \code{u5=0}. With \code{u5!=0}, the normalized kinetic energy is \code{1+u5}.
 #'
-#' @return focal point.
+#' @return focal distance, measured from the entrance grid.
 #' 
 #' @keywords internal
 #' @export

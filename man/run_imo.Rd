@@ -4,18 +4,25 @@
 \alias{run_imo}
 \title{Runs ion mirror optimization.}
 \usage{
-run_imo(imo_config, resume = FALSE, type = c("GLPM", "ZEIM", "PIM"))
+run_imo(
+  imo_config,
+  type = c("GLPM", "ZEIM", "PIM"),
+  resume = FALSE,
+  write = TRUE
+)
 }
 \arguments{
 \item{imo_config}{path and name of imo_config file (.toml)}
 
-\item{resume}{if \code{FALSE} (default) starting values are taken from the
-tuneR_config file, if \code{TRUE} starting values are taken from the last
-bestpoint_run.txt (see 'Details').}
-
 \item{type}{Ion mirror type. Currently supported are \code{"GLPM"}: gridless
 planar mirrors, \code{"ZEIM"}: cylindrical Zhang-Enke three-element ion 
 mirrors, \code{"PIM"}: planar ion mirrors.}
+
+\item{resume}{if \code{FALSE} (default) starting values are taken from the
+imo_config file, if \code{TRUE} starting values are taken from the last
+bestpoint_run.txt (see 'Details').}
+
+\item{write}{Write output files (\code{TRUE} (default) or \code{FALSE}).}
 }
 \description{
 \code{run_imo} runs ion mirror optimization.

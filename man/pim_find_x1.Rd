@@ -24,7 +24,7 @@ the mean kinetic energy ("voltage"/K_0) of the (singly-charged) ions with
 \code{u5=0}. With \code{u5!=0}, the normalized kinetic energy is \code{1+u5}.}
 }
 \value{
-focal point.
+focal distance, measured from the entrance grid.
 }
 \description{
 \code{pim_find_x1} finds the time-of-flight focal point of the mirror.

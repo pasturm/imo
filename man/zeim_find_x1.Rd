@@ -20,7 +20,7 @@ zeim_find_x1(z1, z2, L, V1, V2, R)
 \item{R}{Radius of the cylinder.}
 }
 \value{
-time-of-flight.
+focal point (measured from the entrance grid).
 }
 \description{
 \code{zeim_find_x1} finds the time-of-flight focal point of the mirror.

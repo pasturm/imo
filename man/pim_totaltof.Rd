@@ -16,7 +16,8 @@ length of the mirror.}
 \item{V}{Vector of normalized electrode potentials. The entrance grid and the 
 first electrode are assumed to be grounded (\code{V[1]=0}).}
 
-\item{x1}{Focal distance of mirror (normalized with H).}
+\item{x1}{Focal distance of mirror (normalized with H), measured from the 
+entrance grid).}
 
 \item{d5}{Distance of first linear stage of mirror (normalized with H).}
 

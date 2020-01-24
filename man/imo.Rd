@@ -3,7 +3,6 @@
 \docType{package}
 \name{imo}
 \alias{imo}
-\alias{imo-package}
 \title{Ion Mirror Optimization.}
 \description{
 The R package provides functions to optimize the geometry and voltages of 

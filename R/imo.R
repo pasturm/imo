@@ -13,12 +13,13 @@
 #' all subfolders of imo_results will be taken.
 #'
 #' @param imo_config path and name of imo_config file (.toml)
-#' @param resume if \code{FALSE} (default) starting values are taken from the
-#' tuneR_config file, if \code{TRUE} starting values are taken from the last
-#' bestpoint_run.txt (see 'Details').
 #' @param type Ion mirror type. Currently supported are \code{"GLPM"}: gridless
 #' planar mirrors, \code{"ZEIM"}: cylindrical Zhang-Enke three-element ion 
-#' mirrors, \code{"PIM"}: planar ion mirrors. 
+#' mirrors, \code{"PIM"}: planar ion mirrors.
+#' @param resume if \code{FALSE} (default) starting values are taken from the
+#' imo_config file, if \code{TRUE} starting values are taken from the last
+#' bestpoint_run.txt (see 'Details').
+#' @param write Write output files (\code{TRUE} (default) or \code{FALSE}).
 #'
 #' @examples
 #' \dontrun{
@@ -27,8 +28,8 @@
 #' }
 #' 
 #' @export
-run_imo = function(imo_config, resume = FALSE, 
-                   type = c("GLPM", "ZEIM", "PIM")) {
+run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
+                   resume = FALSE, write = TRUE) {
   
   # configuration --------------------------------------------------------------
   
@@ -48,7 +49,9 @@ run_imo = function(imo_config, resume = FALSE,
   
   # result path
   imo_dir = file.path(dirname(imo_config), "imo_results")
-  if (!dir.exists(imo_dir)) { dir.create(imo_dir) }
+  if (write) {
+    if (!dir.exists(imo_dir)) { dir.create(imo_dir) }
+  }
   
   # response variables for optimization
   responses = do.call(rbind.data.frame, c(config$responses, stringsAsFactors = FALSE))
@@ -140,7 +143,9 @@ run_imo = function(imo_config, resume = FALSE,
     # run optimization runs -----------------------------------------------------
     # make imo_results result directory
     resultdir = paste(timestring, formatC(k, width = 2, flag = "0"), sep="_")
-    dir.create(file.path(imo_dir, resultdir))
+    if (write) {
+      dir.create(file.path(imo_dir, resultdir))
+    }
     
     # bbd_data
     bbd_data = rsm::decode.data(design[,3:(3+nfact-1)])
@@ -162,8 +167,10 @@ run_imo = function(imo_config, resume = FALSE,
                                         error = function(e) controls$StartValue[i])
     }
     
-    utils::write.table(signif(runs, 12), file = file.path(imo_dir, resultdir, "runs.txt"), 
-                       sep = "|", row.names = FALSE, col.names = TRUE, eol = "|\n")
+    if (write) {
+      utils::write.table(signif(runs, 12), file = file.path(imo_dir, resultdir, "runs.txt"),
+                         sep = "|", row.names = FALSE, col.names = TRUE, eol = "|\n")
+    }
     
     print(paste0("Repeat ", k, ", run ", 1, " to ", length(runs[,1]),  " running..."))
     
@@ -178,7 +185,7 @@ run_imo = function(imo_config, resume = FALSE,
         V = c(runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i], runs$V5[i], runs$V6[i])
         x1 = glpm_find_x1(L, V, H)
         tmp = glpm_tofperiod(E = E, x1 = x1, L, V, H)
-        return(c(i, 1/stats::sd(tmp), x1, tmp))
+        return(c(i, 1/stats::sd(tmp), x1/H, tmp))
       }
     } else if (type == "ZEIM") {
       result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
@@ -216,10 +223,10 @@ run_imo = function(imo_config, resume = FALSE,
     
     result = result[c("no", "res", "x1")]
     
-    utils::write.table(signif(result, 12), file = file.path(imo_dir, resultdir, "results.txt"), 
-                       sep = "|", row.names = FALSE, col.names = TRUE, eol = "|\n")
-    
-    
+    if (write) {
+      utils::write.table(signif(result, 12), file = file.path(imo_dir, resultdir, "results.txt"), 
+                         sep = "|", row.names = FALSE, col.names = TRUE, eol = "|\n")
+    }
     
     # fit quadratic model and optimize -------------------------------------------
     
@@ -274,9 +281,11 @@ run_imo = function(imo_config, resume = FALSE,
     }
     
     # run experiment
-    utils::write.table(signif(bestpoint_run, 12), 
-                       file = file.path(imo_dir, resultdir, "bestpoint_run.txt"), 
-                       sep = "|", row.names = FALSE, col.names = TRUE, eol = "|\n")
+    if (write) {
+      utils::write.table(signif(bestpoint_run, 12), 
+                         file = file.path(imo_dir, resultdir, "bestpoint_run.txt"), 
+                         sep = "|", row.names = FALSE, col.names = TRUE, eol = "|\n")
+    }
     
     # run experiment
     bestpoint_result = data.frame(no = 1, res = NA, x1 = NA)
@@ -286,8 +295,8 @@ run_imo = function(imo_config, resume = FALSE,
       L = c(bestpoint_run$L1, bestpoint_run$L2, bestpoint_run$L3, bestpoint_run$L4, bestpoint_run$L5, bestpoint_run$L6)
       V = c(bestpoint_run$V1, bestpoint_run$V2, bestpoint_run$V3, bestpoint_run$V4, bestpoint_run$V5, bestpoint_run$V6)
       
-      x1 = glpm_find_x1(L, V, H)
-      tmp = glpm_tofperiod(E = E, x1 = x1, L, V, H)
+      x1 = glpm_find_x1(L, V, H)/H
+      tmp = glpm_tofperiod(E = E, x1 = x1*H, L, V, H)
     } else if (type == "ZEIM") {
       x1 = zeim_find_x1(bestpoint_run$Z1, bestpoint_run$Z2, bestpoint_run$L,
                         bestpoint_run$V1, bestpoint_run$V2, bestpoint_run$R)
@@ -311,14 +320,15 @@ run_imo = function(imo_config, resume = FALSE,
                     col = grDevices::rgb(1,0,0,1))
     mtext(paste(round(bestpoint_run,4), collapse = " | "), side = 1, line = -1)
     
+    if (write) {
+      utils::write.table(signif(bestpoint_result, 12), 
+                         file = file.path(imo_dir, resultdir, "bestpoint_results.txt"), 
+                         sep = "|", row.names = FALSE, col.names = TRUE, eol = "|\n")
     
-    utils::write.table(signif(bestpoint_result, 12), 
-                       file = file.path(imo_dir, resultdir, "bestpoint_results.txt"), 
-                       sep = "|", row.names = FALSE, col.names = TRUE, eol = "|\n")
-    
-    # save all data as .RData
-    save(list = ls(all.names = TRUE), 
-         file = file.path(imo_dir, resultdir, "results.RData"))
+      # save all data as .RData
+      save(list = ls(all.names = TRUE), 
+           file = file.path(imo_dir, resultdir, "results.RData"))
+    }
     
     # end of loop
   }

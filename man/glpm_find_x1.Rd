@@ -14,7 +14,7 @@ glpm_find_x1(L, V, H)
 \item{H}{Height of the mirror electrodes (the same for all electrodes).}
 }
 \value{
-time-of-flight.
+focal distance, measured from the back plane.
 }
 \description{
 \code{glpm_find_x1} finds the time-of-flight focal point of the mirror.
