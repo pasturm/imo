@@ -4,20 +4,19 @@
 \alias{glpm_tofperiod}
 \title{Time-of-flight period calculation.}
 \usage{
-glpm_tofperiod(E, x1, L, V, H)
+glpm_tofperiod(E, x1, L, V)
 }
 \arguments{
 \item{E}{Vector of potential energies at the turning point (normalized with
 the mean energy (K/K_0).}
 
 \item{x1}{End distance of the particle, typically the time-of-flight focal 
-point of the mirror.}
+point of the mirror (in units of H).}
 
-\item{L}{Vector of electrode lengths normalized with H ("lenght"/\code{H}).}
+\item{L}{Vector of electrode lengths normalized with the height H of the 
+mirror electrodes ("length"/\code{H}).}
 
 \item{V}{Vector of voltages normalized with the mean energy ("voltage"/K_0)}
-
-\item{H}{Height of the mirror electrodes (the same for all electrodes).}
 }
 \value{
 time-of-flight.

@@ -181,13 +181,12 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
 
     type = match.arg(type)
     if (type == "GLPM") {
-      H = 20
       result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
         L = c(runs$L1[i], runs$L2[i], runs$L3[i], runs$L4[i], runs$L5[i], runs$L6[i])
         V = c(runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i], runs$V5[i], runs$V6[i])
-        x1 = glpm_find_x1(L, V, H)
-        tmp = glpm_tofperiod(E = E, x1 = x1, L, V, H)
-        return(c(i, 1/stats::sd(tmp), x1/H, tmp))
+        x1 = glpm_find_x1(L, V)
+        tmp = glpm_tofperiod(E = E, x1 = x1, L, V)
+        return(c(i, 1/stats::sd(tmp), x1, tmp))
       }
     } else if (type == "ZEIM") {
       result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
@@ -298,8 +297,8 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
       L = c(bestpoint_run$L1, bestpoint_run$L2, bestpoint_run$L3, bestpoint_run$L4, bestpoint_run$L5, bestpoint_run$L6)
       V = c(bestpoint_run$V1, bestpoint_run$V2, bestpoint_run$V3, bestpoint_run$V4, bestpoint_run$V5, bestpoint_run$V6)
       
-      x1 = glpm_find_x1(L, V, H)/H
-      tmp = glpm_tofperiod(E = E, x1 = x1*H, L, V, H)
+      x1 = glpm_find_x1(L, V)
+      tmp = glpm_tofperiod(E = E, x1 = x1, L, V)
     } else if (type == "ZEIM") {
       x1 = zeim_find_x1(bestpoint_run$Z1, bestpoint_run$Z2, bestpoint_run$L,
                         bestpoint_run$V1, bestpoint_run$V2, bestpoint_run$R)
@@ -312,18 +311,20 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
       x1 = pim_find_x1(z, V, bestpoint_run$D5, bestpoint_run$U5)
       tmp = pim_totaltof(E = E, z, V, x1, bestpoint_run$D5, bestpoint_run$U5)
     }
-    bestpoint_result$res = 1/stats::sd(tmp)
+    # bestpoint_result$res = 1/stats::sd(tmp)  # this is the response variable
+    resolution = 1/diff(range((2*(tmp-tmp[ceiling(length(E)/2)]))/tmp[ceiling(length(E)/2)]))
+    bestpoint_result$res = resolution  # this corresponds to Verentchikov's time-energy focusing
     bestpoint_result$x1 = x1
     
-    print(paste0("Best point: ", paste0(names(bestpoint_run), "=", 
-                                        round(bestpoint_run,3), collapse = "|"),
-                 "|x1=", round(x1,2)))
+    result_string = bestpoint_run[2:length(bestpoint_run)]
+    print(paste0("Best point: ", paste0(names(result_string), "=", 
+                                        round(result_string, 3), collapse = "|"),
+                 "|x1=", round(x1,2),"|res=",floor(bestpoint_result$res)))
     # plot
     graphics::lines((E-1)*100, (tmp-tmp[ceiling(length(E)/2)])/tmp[ceiling(length(E)/2)]*1e6, 
                     col = grDevices::rgb(1,0,0,1))
-    # mtext(paste(round(bestpoint_run,4), collapse = " | "), side = 1, line = -1)
-    mtext(paste0(names(bestpoint_run), "=", 
-                 round(bestpoint_run,4), collapse = " | "), side = 1, line = -1, cex = 0.8)
+    mtext(paste0(names(result_string), "=", 
+                 round(result_string,3), collapse = " | "), side = 1, line = -1, cex = 0.8)
     
     if (write) {
       utils::write.table(signif(bestpoint_result, 12), 

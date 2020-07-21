@@ -4,17 +4,16 @@
 \alias{glpm_find_x1}
 \title{Finds the time-of-flight focal point of the mirror.}
 \usage{
-glpm_find_x1(L, V, H)
+glpm_find_x1(L, V)
 }
 \arguments{
-\item{L}{Vector of electrode lengths normalized with H ("lenght"/\code{H}).}
+\item{L}{Vector of electrode lengths normalized with the height H of the 
+mirror electrodes ("length"/\code{H}).}
 
 \item{V}{Vector of voltages normalized with the mean energy ("voltage"/K_0)}
-
-\item{H}{Height of the mirror electrodes (the same for all electrodes).}
 }
 \value{
-focal distance, measured from the back plane.
+focal distance, measured from the back plane, normalized with H.
 }
 \description{
 \code{glpm_find_x1} finds the time-of-flight focal point of the mirror.

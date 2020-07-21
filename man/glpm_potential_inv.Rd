@@ -4,19 +4,18 @@
 \alias{glpm_potential_inv}
 \title{Calculates the inverse of the axial potential function.}
 \usage{
-glpm_potential_inv(y, L, V, H)
+glpm_potential_inv(y, L, V)
 }
 \arguments{
 \item{y}{Axial potential.}
 
-\item{L}{Vector of electrode lengths normalized with H ("lenght"/\code{H}).}
+\item{L}{Vector of electrode lengths normalized with the height H of the 
+mirror electrodes ("length"/\code{H}).}
 
 \item{V}{Vector of voltages normalized with the mean energy ("voltage"/K_0)}
-
-\item{H}{Height of the mirror electrodes (the same for all electrodes).}
 }
 \value{
-Position x where the axial potential = y.
+Position x (in units of H) where the axial potential = y.
 }
 \description{
 \code{glpm_potential_inv} calculates the position x given the axial potential (inverse

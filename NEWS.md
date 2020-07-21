@@ -1,4 +1,4 @@
-# Version 0.1.0.9002
+# Version 0.1.0.9003
 
 * `run_imo(tuneR_config, type = "GLPM")` normalizes the focal distance to the 
   height H.
@@ -13,6 +13,8 @@
 * `run_imo()` returns the optimized best point of the last run.
 
 * Updated the configuration file templates.
+
+* All distances in GLPM functions are normalized to H.
 
 
 # Version 0.1.0

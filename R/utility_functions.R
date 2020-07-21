@@ -100,10 +100,10 @@ desirability_overall = function(factors, Target, w, nfact, xnam, tuner_rsm,
 #'
 #' \code{glpm_potential} calculates the axial potential of gridless planar mirrors.
 #'
-#' @param x Axial distance from the end electrode.
-#' @param L Vector of electrode lengths normalized with H ("lenght"/\code{H}).
+#' @param x Axial distance from the end electrode. x is normalized to the height
+#' H of the mirror electrodes (same height for all electrodes).
+#' @param L Vector of electrode lengths normalized with H ("length"/\code{H}).
 #' @param V Vector of voltages normalized with the mean energy ("voltage"/K_0).
-#' @param H Height of the mirror electrodes (the same for all electrodes).
 #'
 #' @return Axial potential at \code{x}.
 #'
@@ -114,22 +114,22 @@ desirability_overall = function(factors, Target, w, nfact, xnam, tuner_rsm,
 #' 
 #' @keywords internal
 #' @export
-glpm_potential = function(x, L, V, H) {
+glpm_potential = function(x, L, V) {
   a = L
   b = L
   n = length(L)
   a[1] = 0
   for (i in 1:(n-1)) {
-    a[i+1] = sum(L[1:i])*H
+    a[i+1] = sum(L[1:i])
   }
   for (i in 1:n) {
-    b[i] = sum(L[1:i])*H
+    b[i] = sum(L[1:i])
   }
   
-  Vx = 4*V[1]/pi*atan(exp(-pi*x/H)) 
+  Vx = 4*V[1]/pi*atan(exp(-pi*x)) 
   for (i in 1:n) {
-    Vx = Vx + 2*V[i]/pi*(atan(exp(pi*(x-a[i])/H)) + atan(exp(pi*(x+a[i])/H))) -
-      2*V[i]/pi*(atan(exp(pi*(x-b[i])/H)) + atan(exp(pi*(x+b[i])/H)))
+    Vx = Vx + 2*V[i]/pi*(atan(exp(pi*(x-a[i]))) + atan(exp(pi*(x+a[i])))) -
+      2*V[i]/pi*(atan(exp(pi*(x-b[i]))) + atan(exp(pi*(x+b[i]))))
   }
   return(Vx)
 }
@@ -144,17 +144,17 @@ glpm_potential = function(x, L, V, H) {
 #' point inside the mirror for a given kinetic energy.
 #' 
 #' @param y Axial potential.
-#' @param L Vector of electrode lengths normalized with H ("lenght"/\code{H}).
+#' @param L Vector of electrode lengths normalized with the height H of the 
+#' mirror electrodes ("length"/\code{H}).
 #' @param V Vector of voltages normalized with the mean energy ("voltage"/K_0)
-#' @param H Height of the mirror electrodes (the same for all electrodes).
 #'
-#' @return Position x where the axial potential = y.
+#' @return Position x (in units of H) where the axial potential = y.
 #' 
 #' @keywords internal
 #' @export
-glpm_potential_inv = function(y, L, V, H) {
-  stats::uniroot((function(x,L,V,H) glpm_potential(x,L,V,H)-y), interval = c(0,100), 
-                 L, V, H, tol = 1e-15)$root
+glpm_potential_inv = function(y, L, V) {
+  stats::uniroot((function(x,L,V) glpm_potential(x,L,V)-y), interval = c(0,5), 
+                 L, V, tol = 1e-15)$root
 }
 
 # GLPM integrand for tof period calculation -----------------------------------------
@@ -162,33 +162,33 @@ glpm_potential_inv = function(y, L, V, H) {
 #'
 #' \code{glpm_integrand} is the integrand for the time-of-flight period calculation.
 #' 
-#' @param x Axial distance from the end electrode.
+#' @param x Axial distance from the end electrode, normalized to the height H of
+#' the mirror electrodes.
 #' @param E Potential energy at the turning point (normalized with the mean 
 #' energy (K/K_0).
-#' @param L Vector of electrode lengths normalized with H ("lenght"/\code{H}).
+#' @param L Vector of electrode lengths normalized with H ("length"/\code{H}).
 #' @param V Vector of voltages normalized with the mean energy ("voltage"/K_0)
-#' @param H Height of the mirror electrodes (the same for all electrodes).
 #'
 #' @return Axial potential at \code{x}.
 #' 
 #' @keywords internal
 #' @export
-glpm_integrand = function(x, E, L, V, H) {
+glpm_integrand = function(x, E, L, V) {
   
   a = L
   b = L
   n = length(L)
   a[1] = 0
   for (i in 1:(n-1)) {
-    a[i+1] = sum(L[1:i])*H
+    a[i+1] = sum(L[1:i])
   }
   for (i in 1:n) {
-    b[i] = sum(L[1:i])*H
+    b[i] = sum(L[1:i])
   }
-  Vx = 4*V[1]/pi*atan(exp(-pi*x/H)) 
+  Vx = 4*V[1]/pi*atan(exp(-pi*x)) 
   for (i in 1:n) {
-    Vx = Vx + 2*V[i]/pi*(atan(exp(pi*(x-a[i])/H)) + atan(exp(pi*(x+a[i])/H))) -
-      2*V[i]/pi*(atan(exp(pi*(x-b[i])/H)) + atan(exp(pi*(x+b[i])/H)))
+    Vx = Vx + 2*V[i]/pi*(atan(exp(pi*(x-a[i]))) + atan(exp(pi*(x+a[i])))) -
+      2*V[i]/pi*(atan(exp(pi*(x-b[i]))) + atan(exp(pi*(x+b[i]))))
   }
   Vx = 1/sqrt(E - Vx)
   
@@ -208,19 +208,19 @@ glpm_integrand = function(x, E, L, V, H) {
 #' @param E Vector of potential energies at the turning point (normalized with
 #' the mean energy (K/K_0).
 #' @param x1 End distance of the particle, typically the time-of-flight focal 
-#' point of the mirror.
-#' @param L Vector of electrode lengths normalized with H ("lenght"/\code{H}).
+#' point of the mirror (in units of H).
+#' @param L Vector of electrode lengths normalized with the height H of the 
+#' mirror electrodes ("length"/\code{H}).
 #' @param V Vector of voltages normalized with the mean energy ("voltage"/K_0)
-#' @param H Height of the mirror electrodes (the same for all electrodes).
 #'
 #' @return time-of-flight.
 #' 
 #' @keywords internal
 #' @export
-glpm_tofperiod = function(E, x1, L, V, H) {
-  x0 = sapply(E, glpm_potential_inv, L, V, H)
-  tof = mapply(function(x0, x1, E) stats::integrate(glpm_integrand, x0, x1, E, L, V, H,
-                                                    rel.tol = 1e-6)$value, x0, x1, E)
+glpm_tofperiod = function(E, x1, L, V) {
+  x0 = sapply(E, glpm_potential_inv, L, V)
+  tof = mapply(function(x0, x1, E) stats::integrate(glpm_integrand, x0, x1, E, L, V,
+                                                    rel.tol = 1e-7)$value, x0, x1, E)
   return(tof)
 }
 
@@ -229,29 +229,30 @@ glpm_tofperiod = function(E, x1, L, V, H) {
 #'
 #' \code{glpm_find_x1} finds the time-of-flight focal point of the mirror.
 #' 
-#' @param L Vector of electrode lengths normalized with H ("lenght"/\code{H}).
+#' @param L Vector of electrode lengths normalized with the height H of the 
+#' mirror electrodes ("length"/\code{H}).
 #' @param V Vector of voltages normalized with the mean energy ("voltage"/K_0)
-#' @param H Height of the mirror electrodes (the same for all electrodes).
 #'
-#' @return focal distance, measured from the back plane.
+#' @return focal distance, measured from the back plane, normalized with H.
 #' 
 #' @keywords internal
 #' @export
-glpm_find_x1 = function(L, V, H) {
-  E = seq(0.99, 1.01, length.out = 2)
-  x1 = 3*H
-  dx = 10
+glpm_find_x1 = function(L, V) {
+  E = seq(0.999, 1.001, length.out = 2)
+  x1 = 3
+  dx = 1
   repeat {
-    tmp = glpm_tofperiod(E = E, x1 = x1, L,V,H)
+    tmp = glpm_tofperiod(E = E, x1 = x1, L,V)
     if (diff(tmp) < 0) {
       x1 = x1 - dx
       dx = dx/10
     }
     x1 = x1 + dx
-    if (dx < 1e-5) break
+    if (dx < 1e-6) break
   }
   return(x1)
 }
+
 # ZEIM variables in package environment ----------------------------------------
 # https://stackoverflow.com/questions/12598242/global-variables-in-packages-in-r
 pkg_env = new.env()

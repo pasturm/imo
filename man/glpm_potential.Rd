@@ -4,16 +4,15 @@
 \alias{glpm_potential}
 \title{Calculates the axial potential of gridless planar mirrors.}
 \usage{
-glpm_potential(x, L, V, H)
+glpm_potential(x, L, V)
 }
 \arguments{
-\item{x}{Axial distance from the end electrode.}
+\item{x}{Axial distance from the end electrode. x is normalized to the height
+H of the mirror electrodes (same height for all electrodes).}
 
-\item{L}{Vector of electrode lengths normalized with H ("lenght"/\code{H}).}
+\item{L}{Vector of electrode lengths normalized with H ("length"/\code{H}).}
 
 \item{V}{Vector of voltages normalized with the mean energy ("voltage"/K_0).}
-
-\item{H}{Height of the mirror electrodes (the same for all electrodes).}
 }
 \value{
 Axial potential at \code{x}.

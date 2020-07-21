@@ -4,19 +4,18 @@
 \alias{glpm_integrand}
 \title{Integrand for tof period calculation.}
 \usage{
-glpm_integrand(x, E, L, V, H)
+glpm_integrand(x, E, L, V)
 }
 \arguments{
-\item{x}{Axial distance from the end electrode.}
+\item{x}{Axial distance from the end electrode, normalized to the height H of
+the mirror electrodes.}
 
 \item{E}{Potential energy at the turning point (normalized with the mean 
 energy (K/K_0).}
 
-\item{L}{Vector of electrode lengths normalized with H ("lenght"/\code{H}).}
+\item{L}{Vector of electrode lengths normalized with H ("length"/\code{H}).}
 
 \item{V}{Vector of voltages normalized with the mean energy ("voltage"/K_0)}
-
-\item{H}{Height of the mirror electrodes (the same for all electrodes).}
 }
 \value{
 Axial potential at \code{x}.
