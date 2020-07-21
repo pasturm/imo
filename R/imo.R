@@ -20,11 +20,13 @@
 #' imo_config file, if \code{TRUE} starting values are taken from the last
 #' bestpoint_run.txt (see 'Details').
 #' @param write Write output files (\code{TRUE} (default) or \code{FALSE}).
+#' 
+#' @return A data.frame containing the optimized best points from the last run. 
 #'
 #' @examples
 #' \dontrun{
 #' imo_config = system.file("ZEIMimo_config.toml", package = "imo")
-#' run_imo(imo_config, type = "ZEIM")
+#' bestpoint = run_imo(imo_config, type = "ZEIM")
 #' }
 #' 
 #' @export
@@ -213,8 +215,9 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
     ymax = max((tmp-tmp[,ceiling(length(E)/2)])/tmp[,ceiling(length(E)/2)]*1e6)
     graphics::plot((E-1)*100, (tmp[1,]-tmp[1,ceiling(length(E)/2)])/tmp[1,ceiling(length(E)/2)]*1e6,
                    type = "n", main = paste("Repeat", k), ylim = c(ymin, ymax),
-                   ylab = expression(paste(Delta,"tof/tof") ~ "/" ~ 10^{6}),
-                   xlab = expression(paste(Delta,"E/E") ~ "/"~ 100))
+                   ylab = "",
+                   xlab = expression(paste(Delta,"E") / "E" %.% 100))
+    title(ylab = expression(paste(Delta,"t") / "t" %.% 10^{6}), line = 2.5)
     graphics::grid()
     for (i in 1:length(tmp[,1])) {
       graphics::lines((E-1)*100, (tmp[i,]-tmp[i,ceiling(length(E)/2)])/tmp[i,ceiling(length(E)/2)]*1e6, 
@@ -318,7 +321,9 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
     # plot
     graphics::lines((E-1)*100, (tmp-tmp[ceiling(length(E)/2)])/tmp[ceiling(length(E)/2)]*1e6, 
                     col = grDevices::rgb(1,0,0,1))
-    mtext(paste(round(bestpoint_run,4), collapse = " | "), side = 1, line = -1)
+    # mtext(paste(round(bestpoint_run,4), collapse = " | "), side = 1, line = -1)
+    mtext(paste0(names(bestpoint_run), "=", 
+                 round(bestpoint_run,4), collapse = " | "), side = 1, line = -1, cex = 0.8)
     
     if (write) {
       utils::write.table(signif(bestpoint_result, 12), 
@@ -332,5 +337,6 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
     
     # end of loop
   }
+  return(bestpoint_run)
   
 }

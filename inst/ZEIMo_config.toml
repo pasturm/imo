@@ -17,18 +17,18 @@ n_repeats = 20
 # Factors
 # Note: between 3 and 7 factors need to be enabled
 [factors]
-1  = { Name = "v1", Enabled = 1, Transformation = "V1", Range = 0.02, LowLimit = 0, HighLimit = 1.5 }
-2  = { Name = "v2", Enabled = 1, Transformation = "V2", Range = 0.02, LowLimit = 1, HighLimit = 2 }
-3  = { Name = "z1", Enabled = 1, Transformation = "Z1", Range = 0.02, LowLimit = 0, HighLimit = 1000 }
-4  = { Name = "z2", Enabled = 1, Transformation = "Z2", Range = 0.02, LowLimit = 0, HighLimit = 1000 }
-5  = { Name = "l", Enabled = 0, Transformation = "L", Range = 0.02, LowLimit = 0, HighLimit = 1000 }
-6  = { Name = "r", Enabled = 0, Transformation = "R", Range = 0.02, LowLimit = 0, HighLimit = 1000 }
+01 = { Name = "v1", Enabled = 1, Transformation = "V1", Range = 0.02, LowLimit = 0, HighLimit = 1.5 }
+02 = { Name = "v2", Enabled = 1, Transformation = "V2", Range = 0.02, LowLimit = 1, HighLimit = 2 }
+03 = { Name = "z1", Enabled = 1, Transformation = "Z1", Range = 0.02, LowLimit = 0, HighLimit = 1000 }
+04 = { Name = "z2", Enabled = 1, Transformation = "Z2", Range = 0.02, LowLimit = 0, HighLimit = 1000 }
+05 = { Name = "l", Enabled = 0, Transformation = "L", Range = 0.02, LowLimit = 0, HighLimit = 1000 }
+06 = { Name = "r", Enabled = 0, Transformation = "R", Range = 0.02, LowLimit = 0, HighLimit = 1000 }
 
 # Controls
 [controls]
-1  = { Name = "V1", Transformation = "v1", StartValue = 0.844 }
-2  = { Name = "V2", Transformation = "v2", StartValue = 1.2467 }
-3  = { Name = "Z1", Transformation = "z1", StartValue = 103 }
-4  = { Name = "Z2", Transformation = "z2", StartValue = 250 }
-5  = { Name = "L", Transformation = "l", StartValue = 288 }
-6  = { Name = "R", Transformation = "r", StartValue = 149 }
+01 = { Name = "V1", Transformation = "v1", StartValue = 0.844 }
+02 = { Name = "V2", Transformation = "v2", StartValue = 1.2467 }
+03 = { Name = "Z1", Transformation = "z1", StartValue = 103 }
+04 = { Name = "Z2", Transformation = "z2", StartValue = 250 }
+05 = { Name = "L", Transformation = "l", StartValue = 288 }
+06 = { Name = "R", Transformation = "r", StartValue = 149 }

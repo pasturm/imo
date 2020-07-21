@@ -1,6 +1,6 @@
 Package: imo
 Title: Ion Mirror Optimization
-Version: 0.1.0.9001
+Version: 0.1.0.9002
 Authors@R: c(
   person("Patrick", "Sturm", role = c("aut", "cre"), 
           email = "sturm@tofwerk.com"),
@@ -14,4 +14,4 @@ URL: https://github.com/pasturm/imo
 BugReports: https://github.com/pasturm/imo/issues
 Imports: RcppTOML, plotly, gplots, foreach, doParallel, gsl
 Encoding: UTF-8
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1

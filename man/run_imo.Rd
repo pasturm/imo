@@ -24,6 +24,9 @@ bestpoint_run.txt (see 'Details').}
 
 \item{write}{Write output files (\code{TRUE} (default) or \code{FALSE}).}
 }
+\value{
+A data.frame containing the optimized best points from the last run.
+}
 \description{
 \code{run_imo} runs ion mirror optimization.
 }
@@ -40,7 +43,7 @@ all subfolders of imo_results will be taken.
 \examples{
 \dontrun{
 imo_config = system.file("ZEIMimo_config.toml", package = "imo")
-run_imo(imo_config, type = "ZEIM")
+bestpoint = run_imo(imo_config, type = "ZEIM")
 }
 
 }
