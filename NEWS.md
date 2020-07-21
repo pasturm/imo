@@ -1,4 +1,4 @@
-# Version 0.1.0.9003
+# Version 0.1.0.9004
 
 * `run_imo(tuneR_config, type = "GLPM")` normalizes the focal distance to the 
   height H.
@@ -14,7 +14,11 @@
 
 * Updated the configuration file templates.
 
-* All distances in GLPM functions are normalized to H.
+* All distances in GLPM functions are normalized to the height H of the mirror
+  electrodes.
+
+* The GLPM optimization reports the resolution obtained with 10 % energy 
+  variation.
 
 
 # Version 0.1.0

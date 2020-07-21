@@ -299,21 +299,29 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
       
       x1 = glpm_find_x1(L, V)
       tmp = glpm_tofperiod(E = E, x1 = x1, L, V)
+      # bestpoint_result$res = 1/stats::sd(tmp)  # resolution based on response variable
+      
+      # calculate time-of-flight variation (resolution) for 10 % energy variation.
+      E_res = seq(0.95, 1.05, 0.005)  # energies (keV)
+      tmp_res = glpm_tofperiod(E = E_res, x1 = x1, L, V)
+      resolution = 1/diff(range((2*(tmp_res-tmp_res[11]))/tmp_res[11]))
+      bestpoint_result$res = resolution
     } else if (type == "ZEIM") {
       x1 = zeim_find_x1(bestpoint_run$Z1, bestpoint_run$Z2, bestpoint_run$L,
                         bestpoint_run$V1, bestpoint_run$V2, bestpoint_run$R)
       tmp = zeim_tofperiod(E = E, bestpoint_run$Z1, bestpoint_run$Z2,
                            bestpoint_run$L, bestpoint_run$V1, bestpoint_run$V2,
                            bestpoint_run$R) + x1*1/sqrt(E)
+      bestpoint_result$res = 1/stats::sd(tmp)
     } else if (type == "PIM") {
       z = c(bestpoint_run$Z1, bestpoint_run$Z2, bestpoint_run$Z3, bestpoint_run$Z4, bestpoint_run$L)
       V = c(0, bestpoint_run$V1, bestpoint_run$V2, bestpoint_run$V3, bestpoint_run$V4)
       x1 = pim_find_x1(z, V, bestpoint_run$D5, bestpoint_run$U5)
       tmp = pim_totaltof(E = E, z, V, x1, bestpoint_run$D5, bestpoint_run$U5)
+      bestpoint_result$res = 1/stats::sd(tmp)
     }
-    # bestpoint_result$res = 1/stats::sd(tmp)  # this is the response variable
-    resolution = 1/diff(range((2*(tmp-tmp[ceiling(length(E)/2)]))/tmp[ceiling(length(E)/2)]))
-    bestpoint_result$res = resolution  # this corresponds to Verentchikov's time-energy focusing
+    
+    
     bestpoint_result$x1 = x1
     
     result_string = bestpoint_run[2:length(bestpoint_run)]
