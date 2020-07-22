@@ -1,4 +1,4 @@
-# Version 0.1.0.9004
+# Version 0.1.0.9005
 
 * `run_imo(tuneR_config, type = "GLPM")` normalizes the focal distance to the 
   height H.
@@ -20,6 +20,9 @@
 * The GLPM optimization reports the resolution obtained with 10 % energy 
   variation.
 
+* Added `plot` parameter in `run_imo()` which (if `FALSE`) does not plot 
+  anything.
+  
 
 # Version 0.1.0
 

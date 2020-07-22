@@ -8,7 +8,8 @@ run_imo(
   imo_config,
   type = c("GLPM", "ZEIM", "PIM"),
   resume = FALSE,
-  write = TRUE
+  write = TRUE,
+  plot = TRUE
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ imo_config file, if \code{TRUE} starting values are taken from the last
 bestpoint_run.txt (see 'Details').}
 
 \item{write}{Write output files (\code{TRUE} (default) or \code{FALSE}).}
+
+\item{plot}{Plot results (\code{TRUE} (default) or \code{FALSE}).}
 }
 \value{
 A data.frame containing the optimized best points from the last run.
