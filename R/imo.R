@@ -84,6 +84,10 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
       for (i in 2:(length(bestpoint_csv)-1)) {
         controls$StartValue[controls$Name==names(bestpoint_csv)[i]] = as.numeric(bestpoint_csv[i])
       }
+    } else if (exists("bestpoint")) {
+      for (i in 2:(length(bestpoint)-1)) {
+        controls$StartValue[controls$Name==names(bestpoint)[i]] = as.numeric(bestpoint[i])
+      }
     }
   }
   
@@ -182,6 +186,7 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
 
     type = match.arg(type)
     if (type == "GLPM") {
+      # `%dopar%` <- foreach::`%dopar%`
       result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
         L = c(runs$L1[i], runs$L2[i], runs$L3[i], runs$L4[i], runs$L5[i], runs$L6[i])
         V = c(runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i], runs$V5[i], runs$V6[i])
@@ -238,8 +243,7 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
     result = result[order(result$no),]  # order
     
     design$res = result$res
-    
-    
+ 
     # fit second order model
     tuner_rsm_R = rsm::rsm(stats::as.formula(paste("res ~ + SO(", paste(xnam, collapse = ","), ")")), 
                            data = design)
@@ -256,7 +260,6 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
                               lower = rep(-1, nfact), upper = rep(1, nfact),
                               control = list(fnscale = -1))$value
     
-    
     # run optimizer
     factors_optim = stats::optim(rep(0, nfact), fn = desirability_overall,
                                  Target = responses$Target, w = responses$Weight,
@@ -272,7 +275,6 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
     bestpoint_predicted = data.frame(res = stats::predict(tuner_rsm_R, factors_optim_coded))
     
     # verify bestpoint -----------------------------------------------------------
-    
     # assign bestpoint values to variables
     for (i in 1:nfact) {
       assign(names(bestpoint)[i], bestpoint[i])
@@ -285,7 +287,6 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
                                                  error = function(e) controls$StartValue[i])
     }
     
-    # run experiment
     if (write) {
       utils::write.table(signif(bestpoint_run, 12), 
                          file = file.path(imo_dir, resultdir, "bestpoint_run.txt"), 
@@ -323,7 +324,6 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
       tmp = pim_totaltof(E = E, z, V, x1, bestpoint_run$D5, bestpoint_run$U5)
       bestpoint_result$res = 1/stats::sd(tmp)
     }
-    
     
     bestpoint_result$x1 = x1
     
