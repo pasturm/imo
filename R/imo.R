@@ -42,11 +42,12 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
   config = RcppTOML::parseTOML(imo_config)
   
   # number of processes
-  np = config$np
+  # np = config$np
   
   # Create np copies of R running in parallel
-  cl = parallel::makeCluster(np)
-  doParallel::registerDoParallel(cl)
+  # cl = parallel::makeCluster(np)
+  # doParallel::registerDoParallel(cl)
+  # on.exit(parallel::stopCluster(cl), add = TRUE)
   
   # Energy range for which time-of-flight variations are minimized
   range_E = config$range_E
@@ -188,42 +189,62 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
     type = match.arg(type)
     if (type == "GLPM") {
       # `%dopar%` <- foreach::`%dopar%`
-      result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
-        L = c(runs$L1[i], runs$L2[i], runs$L3[i], runs$L4[i], runs$L5[i], runs$L6[i])
-        V = c(runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i], runs$V5[i], runs$V6[i])
-        x1 = glpm_find_x1(L, V)
-        tmp = glpm_tofperiod(E = E, x1 = x1, L, V)
-        return(c(i, 1/stats::sd(tmp), x1, tmp))
-      }
-      # for (i in 1:length(runs$run_no)) {
+      # result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
       #   L = c(runs$L1[i], runs$L2[i], runs$L3[i], runs$L4[i], runs$L5[i], runs$L6[i])
       #   V = c(runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i], runs$V5[i], runs$V6[i])
       #   x1 = glpm_find_x1(L, V)
       #   tmp = glpm_tofperiod(E = E, x1 = x1, L, V)
-      #   if (i==1) {
-      #     result = c(i, 1/stats::sd(tmp), x1, tmp)
-      #   } else {
-      #     result = rbind(result, c(i, 1/stats::sd(tmp), x1, tmp))
-      #   }
+      #   return(c(i, 1/stats::sd(tmp), x1, tmp))
       # }
+      for (i in 1:length(runs$run_no)) {
+        L = c(runs$L1[i], runs$L2[i], runs$L3[i], runs$L4[i], runs$L5[i], runs$L6[i])
+        V = c(runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i], runs$V5[i], runs$V6[i])
+        x1 = glpm_find_x1(L, V)
+        tmp = glpm_tofperiod(E = E, x1 = x1, L, V)
+        if (i==1) {
+          result = c(i, 1/stats::sd(tmp), x1, tmp)
+        } else {
+          result = rbind(result, c(i, 1/stats::sd(tmp), x1, tmp))
+        }
+      }
     } else if (type == "ZEIM") {
-      result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
+      # result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
+      #   x1 = zeim_find_x1(runs$Z1[i], runs$Z2[i], runs$L[i], runs$V1[i], runs$V2[i], runs$R[i])
+      #   tmp = zeim_tofperiod(E = E, runs$Z1[i], runs$Z2[i], runs$L[i], runs$V1[i], 
+      #                        runs$V2[i], runs$R[i]) + x1*1/sqrt(E)
+      #   return(c(i, 1/stats::sd(tmp), x1, tmp))
+      # }
+      for (i in 1:length(runs$run_no)) {
         x1 = zeim_find_x1(runs$Z1[i], runs$Z2[i], runs$L[i], runs$V1[i], runs$V2[i], runs$R[i])
         tmp = zeim_tofperiod(E = E, runs$Z1[i], runs$Z2[i], runs$L[i], runs$V1[i], 
                              runs$V2[i], runs$R[i]) + x1*1/sqrt(E)
-        return(c(i, 1/stats::sd(tmp), x1, tmp))
+        if (i==1) {
+          result = c(i, 1/stats::sd(tmp), x1, tmp)
+        } else {
+          result = rbind(result, c(i, 1/stats::sd(tmp), x1, tmp))
         }
+      }
     } else if (type == "PIM") {
-      result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
+      # result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
+      #   z = c(runs$Z1[i], runs$Z2[i], runs$Z3[i], runs$Z4[i], runs$L[i])
+      #   V = c(0, runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i])
+      #   x1 = pim_find_x1(z, V, runs$D5[i], runs$U5[i])
+      #   tmp = pim_totaltof(E = E, z, V, x1, runs$D5[i], runs$U5[i])
+      #   return(c(i, 1/stats::sd(tmp), x1, tmp))
+      # }
+      for (i in 1:length(runs$run_no)) {
         z = c(runs$Z1[i], runs$Z2[i], runs$Z3[i], runs$Z4[i], runs$L[i])
         V = c(0, runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i])
         x1 = pim_find_x1(z, V, runs$D5[i], runs$U5[i])
         tmp = pim_totaltof(E = E, z, V, x1, runs$D5[i], runs$U5[i])
-        return(c(i, 1/stats::sd(tmp), x1, tmp))
+        if (i==1) {
+          result = c(i, 1/stats::sd(tmp), x1, tmp)
+        } else {
+          result = rbind(result, c(i, 1/stats::sd(tmp), x1, tmp))
+        }
       }
     }
-    
-    parallel::stopCluster(cl)
+
     result = as.data.frame(result, row.names = NA)
     names(result) = c("no", "res", "x1")
     
