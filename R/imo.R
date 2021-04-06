@@ -190,15 +190,15 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
     if (type == "GLPM") {
       # `%dopar%` <- foreach::`%dopar%`
       # result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
-      #   L = c(runs$L1[i], runs$L2[i], runs$L3[i], runs$L4[i], runs$L5[i], runs$L6[i])
-      #   V = c(runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i], runs$V5[i], runs$V6[i])
+      #   L = as.numeric(runs[i, grep("L", names(runs))])
+      #   V = as.numeric(runs[i, grep("V", names(runs))])
       #   x1 = glpm_find_x1(L, V)
       #   tmp = glpm_tofperiod(E = E, x1 = x1, L, V)
       #   return(c(i, 1/stats::sd(tmp), x1, tmp))
       # }
       for (i in 1:length(runs$run_no)) {
-        L = c(runs$L1[i], runs$L2[i], runs$L3[i], runs$L4[i], runs$L5[i], runs$L6[i])
-        V = c(runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i], runs$V5[i], runs$V6[i])
+        L = as.numeric(runs[i, grep("L", names(runs))])
+        V = as.numeric(runs[i, grep("V", names(runs))])
         x1 = glpm_find_x1(L, V)
         tmp = glpm_tofperiod(E = E, x1 = x1, L, V)
         if (i==1) {
@@ -226,15 +226,17 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
       }
     } else if (type == "PIM") {
       # result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
-      #   z = c(runs$Z1[i], runs$Z2[i], runs$Z3[i], runs$Z4[i], runs$L[i])
-      #   V = c(0, runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i])
+      #   z = c(as.numeric(runs[i, grep("Z", names(runs))], runs$L[i])
+      #   V = c(0, as.numeric(runs[i, grep("V", names(runs))]))
       #   x1 = pim_find_x1(z, V, runs$D5[i], runs$U5[i])
       #   tmp = pim_totaltof(E = E, z, V, x1, runs$D5[i], runs$U5[i])
       #   return(c(i, 1/stats::sd(tmp), x1, tmp))
       # }
       for (i in 1:length(runs$run_no)) {
-        z = c(runs$Z1[i], runs$Z2[i], runs$Z3[i], runs$Z4[i], runs$L[i])
-        V = c(0, runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i])
+        # z = c(runs$Z1[i], runs$Z2[i], runs$Z3[i], runs$Z4[i], runs$L[i])
+        # V = c(0, runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i])
+        z = c(as.numeric(runs[i, grep("Z", names(runs))]), runs$L[i])
+        V = c(0, as.numeric(runs[i, grep("V", names(runs))]))
         x1 = pim_find_x1(z, V, runs$D5[i], runs$U5[i])
         tmp = pim_totaltof(E = E, z, V, x1, runs$D5[i], runs$U5[i])
         if (i==1) {
@@ -332,18 +334,11 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
     
     # adjust to match choosen parameters
     if (type == "GLPM") {
-      L = c(bestpoint_run$L1, bestpoint_run$L2, bestpoint_run$L3, bestpoint_run$L4, bestpoint_run$L5, bestpoint_run$L6)
-      V = c(bestpoint_run$V1, bestpoint_run$V2, bestpoint_run$V3, bestpoint_run$V4, bestpoint_run$V5, bestpoint_run$V6)
-      
+      L = as.numeric(bestpoint_run[grep("L", names(bestpoint_run))])
+      V = as.numeric(bestpoint_run[grep("V", names(bestpoint_run))])
       x1 = glpm_find_x1(L, V)
       tmp = glpm_tofperiod(E = E, x1 = x1, L, V)
-      # bestpoint_result$res = 1/stats::sd(tmp)  # resolution based on response variable
-      
-      # calculate time-of-flight variation (resolution) for 10 % energy variation.
-      E_res = seq(0.95, 1.05, 0.005)  # energies (keV)
-      tmp_res = glpm_tofperiod(E = E_res, x1 = x1, L, V)
-      resolution = 1/diff(range((2*(tmp_res-tmp_res[11]))/tmp_res[11]))
-      bestpoint_result$res = resolution
+      bestpoint_result$res = 1/stats::sd(tmp)  # resolution based on response variable
     } else if (type == "ZEIM") {
       x1 = zeim_find_x1(bestpoint_run$Z1, bestpoint_run$Z2, bestpoint_run$L,
                         bestpoint_run$V1, bestpoint_run$V2, bestpoint_run$R)
@@ -352,8 +347,10 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
                            bestpoint_run$R) + x1*1/sqrt(E)
       bestpoint_result$res = 1/stats::sd(tmp)
     } else if (type == "PIM") {
-      z = c(bestpoint_run$Z1, bestpoint_run$Z2, bestpoint_run$Z3, bestpoint_run$Z4, bestpoint_run$L)
-      V = c(0, bestpoint_run$V1, bestpoint_run$V2, bestpoint_run$V3, bestpoint_run$V4)
+      # z = c(bestpoint_run$Z1, bestpoint_run$Z2, bestpoint_run$Z3, bestpoint_run$Z4, bestpoint_run$L)
+      # V = c(0, bestpoint_run$V1, bestpoint_run$V2, bestpoint_run$V3, bestpoint_run$V4)
+      z = c(as.numeric(bestpoint_run[grep("Z", names(bestpoint_run))]), bestpoint_run$L)
+      V = c(0, as.numeric(bestpoint_run[grep("V", names(bestpoint_run))]))
       x1 = pim_find_x1(z, V, bestpoint_run$D5, bestpoint_run$U5)
       tmp = pim_totaltof(E = E, z, V, x1, bestpoint_run$D5, bestpoint_run$U5)
       bestpoint_result$res = 1/stats::sd(tmp)
