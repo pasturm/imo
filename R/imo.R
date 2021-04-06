@@ -47,7 +47,6 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
   # Create np copies of R running in parallel
   cl = parallel::makeCluster(np)
   doParallel::registerDoParallel(cl)
-  on.exit(parallel::stopCluster(cl), add = TRUE)
   
   # Energy range for which time-of-flight variations are minimized
   range_E = config$range_E
@@ -196,6 +195,17 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
         tmp = glpm_tofperiod(E = E, x1 = x1, L, V)
         return(c(i, 1/stats::sd(tmp), x1, tmp))
       }
+      # for (i in 1:length(runs$run_no)) {
+      #   L = c(runs$L1[i], runs$L2[i], runs$L3[i], runs$L4[i], runs$L5[i], runs$L6[i])
+      #   V = c(runs$V1[i], runs$V2[i], runs$V3[i], runs$V4[i], runs$V5[i], runs$V6[i])
+      #   x1 = glpm_find_x1(L, V)
+      #   tmp = glpm_tofperiod(E = E, x1 = x1, L, V)
+      #   if (i==1) {
+      #     result = c(i, 1/stats::sd(tmp), x1, tmp)
+      #   } else {
+      #     result = rbind(result, c(i, 1/stats::sd(tmp), x1, tmp))
+      #   }
+      # }
     } else if (type == "ZEIM") {
       result = foreach::foreach(i = 1:length(runs$run_no), .combine = "rbind") %dopar% {
         x1 = zeim_find_x1(runs$Z1[i], runs$Z2[i], runs$L[i], runs$V1[i], runs$V2[i], runs$R[i])
@@ -213,6 +223,7 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
       }
     }
     
+    parallel::stopCluster(cl)
     result = as.data.frame(result, row.names = NA)
     names(result) = c("no", "res", "x1")
     
