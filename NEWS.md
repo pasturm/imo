@@ -1,4 +1,4 @@
-# Version 0.1.0.9006
+# Version 0.1.0.9007
 
 * `run_imo(tuneR_config, type = "GLPM")` normalizes the focal distance to the 
   height H.
@@ -25,6 +25,9 @@
   
 * Takes starting values from `bestpoint` variable if `resume=TRUE` and no 
   "bestpoint_run.txt" file is found.
+  
+* Added `digits` parameter in `run_imo()` which controls the number
+  of decimal places to print when printing the best point values.
   
 
 # Version 0.1.0

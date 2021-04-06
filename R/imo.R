@@ -21,6 +21,8 @@
 #' bestpoint_run.txt (see 'Details').
 #' @param write Write output files (\code{TRUE} (default) or \code{FALSE}).
 #' @param plot Plot results (\code{TRUE} (default) or \code{FALSE}).
+#' @param digits Controls the number of decimal places to print when
+#' printing the best point values.
 #' 
 #' @return A data.frame containing the optimized best points from the last run. 
 #'
@@ -32,7 +34,7 @@
 #' 
 #' @export
 run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
-                   resume = FALSE, write = TRUE, plot = TRUE) {
+                   resume = FALSE, write = TRUE, plot = TRUE, digits = 3) {
   
   # configuration --------------------------------------------------------------
   
@@ -223,7 +225,7 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
                      type = "n", main = paste("Repeat", k), ylim = c(ymin, ymax),
                      ylab = "",
                      xlab = expression(paste(Delta,"E") / "E" %.% 100))
-      title(ylab = expression(paste(Delta,"t") / "t" %.% 10^{6}), line = 2.5)
+      graphics::title(ylab = expression(paste(Delta,"t") / "t" %.% 10^{6}), line = 2.5)
       graphics::grid()
       for (i in 1:length(tmp[,1])) {
         graphics::lines((E-1)*100, (tmp[i,]-tmp[i,ceiling(length(E)/2)])/tmp[i,ceiling(length(E)/2)]*1e6, 
@@ -329,14 +331,14 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
     
     result_string = bestpoint_run[2:length(bestpoint_run)]
     print(paste0("Best point: ", paste0(names(result_string), "=", 
-                                        round(result_string, 3), collapse = "|"),
+                                        round(result_string, digits), collapse = "|"),
                  "|x1=", round(x1,2),"|res=",floor(bestpoint_result$res)))
     # plot
     if (plot) {
       graphics::lines((E-1)*100, (tmp-tmp[ceiling(length(E)/2)])/tmp[ceiling(length(E)/2)]*1e6, 
                       col = grDevices::rgb(1,0,0,1))
-      mtext(paste0(names(result_string), "=", 
-                   round(result_string,3), collapse = " | "), side = 1, line = -1, cex = 0.8)
+      graphics::mtext(paste0(names(result_string), "=", 
+                   round(result_string,digits), collapse = " | "), side = 1, line = -1, cex = 0.8)
     }
     
     if (write) {

@@ -9,7 +9,8 @@ run_imo(
   type = c("GLPM", "ZEIM", "PIM"),
   resume = FALSE,
   write = TRUE,
-  plot = TRUE
+  plot = TRUE,
+  digits = 3
 )
 }
 \arguments{
@@ -26,6 +27,9 @@ bestpoint_run.txt (see 'Details').}
 \item{write}{Write output files (\code{TRUE} (default) or \code{FALSE}).}
 
 \item{plot}{Plot results (\code{TRUE} (default) or \code{FALSE}).}
+
+\item{digits}{Controls the number of decimal places to print when
+printing the best point values.}
 }
 \value{
 A data.frame containing the optimized best points from the last run.
