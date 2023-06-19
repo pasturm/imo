@@ -1,4 +1,4 @@
-# Version 0.1.0.9007
+# Version 0.1.1
 
 * `run_imo(tuneR_config, type = "GLPM")` normalizes the focal distance to the 
   height H.
@@ -29,6 +29,9 @@
 * Added `digits` parameter in `run_imo()` which controls the number
   of decimal places to print when printing the best point values.
   
+* Removed parallelization as it is unstable.
+
+* Fixed bug where not all electrodes were considered.
 
 # Version 0.1.0
 

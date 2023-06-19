@@ -1,7 +1,4 @@
-# PIMo configuration file
-
-# Number of processes for running R in parallel
-np = 4
+# PIM configuration file
 
 # Energy range (in % of mean energy) for which time-of-flight variations are minimized.
 # E.g. range_E = 10 means -5 % .. +5 %

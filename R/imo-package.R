@@ -8,5 +8,4 @@
 #' @docType package
 #' @author Patrick Sturm <sturm@tofwerk.com>
 #' @name imo
-#' @importFrom foreach %dopar%
 NULL

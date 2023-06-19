@@ -13,8 +13,6 @@ remotes::install_github("pasturm/imo")
 See the [NEWS file](https://github.com/pasturm/imo/blob/master/NEWS.md) for the latest release notes.
 
 ## Notes
-* This is currently rather poorly documented.
-* Parallel computing is used to speed up the optimization.
-* The tuning parameters are configured in a [configuration file](https://github.com/pasturm/imo/blob/master/inst/GLPMtuneR_config.toml).
+* The tuning parameters are configured in a [configuration file](https://github.com/pasturm/imo/blob/master/inst/GLPM_config.toml).
 * Design of expriments (DoE) and response surface methodology (RSM) is used for efficient optimization.
 * The same approach is used in [SIMIONtuneR](https://github.com/pasturm/SIMIONtuneR) to efficiently optimize SIMION simulations.
