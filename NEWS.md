@@ -33,6 +33,8 @@
 
 * Fixed bug where not all electrodes were considered.
 
+* `remotes::install_github()` needs `auth_token` argument for private repositories.
+
 # Version 0.1.0
 
 * Initial version.
