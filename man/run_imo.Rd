@@ -18,7 +18,7 @@ run_imo(
 
 \item{type}{Ion mirror type. Currently supported are \code{"GLPM"}: gridless
 planar mirrors, \code{"ZEIM"}: cylindrical Zhang-Enke three-element ion 
-mirrors, \code{"PIM"}: planar ion mirrors.}
+mirrors, \code{"PIM"}: planar ion mirrors (with grid).}
 
 \item{resume}{if \code{FALSE} (default) starting values are taken from the
 imo_config file, if \code{TRUE} starting values are taken from the last
@@ -49,8 +49,8 @@ all subfolders of imo_results will be taken.
 }
 \examples{
 \dontrun{
-imo_config = system.file("ZEIMimo_config.toml", package = "imo")
-bestpoint = run_imo(imo_config, type = "ZEIM")
+imo_config = system.file("GLPM_config.toml", package = "imo")
+bestpoint = run_imo(imo_config, type = "GLPM")
 }
 
 }
