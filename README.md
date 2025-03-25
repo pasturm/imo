@@ -15,5 +15,5 @@ See the [NEWS file](https://github.com/pasturm/imo/blob/master/NEWS.md) for the 
 
 ## Notes
 * The tuning parameters are configured in a [configuration file](https://github.com/pasturm/imo/blob/master/inst/GLPM_config.toml).
-* Design of expriments (DoE) and response surface methodology (RSM) is used for efficient optimization.
+* Design of experiments (DoE) and response surface methodology (RSM) is used for efficient optimization.
 * The same approach is used in [SIMIONtuneR](https://github.com/pasturm/SIMIONtuneR) to efficiently optimize SIMION simulations.

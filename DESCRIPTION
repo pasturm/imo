@@ -7,7 +7,7 @@ Authors@R: c(
   person("TOFWERK", role = c("cph", "fnd")))
 Description: The R package provides functions to optimize the geometry and 
   voltages of planar or axially symmetric ion mirrors, where the potential can 
-  be calculated analytically. Design of expriments (DoE) and response surface 
+  be calculated analytically. Design of experiments (DoE) and response surface 
   methodology (RSM) is used for efficient optimization.
 License: GPL-3
 URL: https://github.com/pasturm/imo

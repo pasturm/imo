@@ -255,14 +255,14 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
       tmp = result[,!(names(result) %in% c("no", "res", "x1"))]
       ymin = min((tmp-tmp[,ceiling(length(E)/2)])/tmp[,ceiling(length(E)/2)]*1e6)
       ymax = max((tmp-tmp[,ceiling(length(E)/2)])/tmp[,ceiling(length(E)/2)]*1e6)
-      graphics::plot((E-1)*100, (tmp[1,]-tmp[1,ceiling(length(E)/2)])/tmp[1,ceiling(length(E)/2)]*1e6,
+      graphics::plot(E, (tmp[1,]-tmp[1,ceiling(length(E)/2)])/tmp[1,ceiling(length(E)/2)]*1e6,
                      type = "n", main = paste("Repeat", k), ylim = c(ymin, ymax),
                      ylab = "",
-                     xlab = expression(paste(Delta,"E") / "E" %.% 100))
-      graphics::title(ylab = expression(paste(Delta,"t") / "t" %.% 10^{6}), line = 2.5)
+                     xlab = expression("E" / "E"[0]))
+      graphics::title(ylab = expression("(T - T"[0] * ")" / "T"[0] %.% 10^6), line = 2.5)
       graphics::grid()
       for (i in 1:length(tmp[,1])) {
-        graphics::lines((E-1)*100, (tmp[i,]-tmp[i,ceiling(length(E)/2)])/tmp[i,ceiling(length(E)/2)]*1e6, 
+        graphics::lines(E, (tmp[i,]-tmp[i,ceiling(length(E)/2)])/tmp[i,ceiling(length(E)/2)]*1e6,
                         col = grDevices::rgb(0,0,0,0.3))
       }
     }
@@ -364,7 +364,7 @@ run_imo = function(imo_config, type = c("GLPM", "ZEIM", "PIM"),
                  "|x1=", round(x1,2),"|res=",floor(bestpoint_result$res)))
     # plot
     if (plot) {
-      graphics::lines((E-1)*100, (tmp-tmp[ceiling(length(E)/2)])/tmp[ceiling(length(E)/2)]*1e6, 
+      graphics::lines(E, (tmp-tmp[ceiling(length(E)/2)])/tmp[ceiling(length(E)/2)]*1e6, 
                       col = grDevices::rgb(1,0,0,1))
       graphics::mtext(paste0(names(result_string), "=", 
                    round(result_string,digits), collapse = " | "), side = 1, line = -1, cex = 0.8)
